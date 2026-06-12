@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import './media/sidebarpart.css';
-import './media/sidebar-redesign.css';
 import './sidebarActions.js';
 import { ActivityBarPosition, IWorkbenchLayoutService, LayoutSettings, Parts, Position as SideBarPosition } from '../../../services/layout/browser/layoutService.js';
 import { SidebarFocusContext, ActiveViewletContext } from '../../../common/contextkeys.js';

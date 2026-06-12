@@ -619,3 +619,84 @@
 .monaco-workbench .xterm.terminal.hide {
 	visibility: hidden;
 }
+
+/*---------------------------------------------------------------------------------------------
+ *  Terminal Polish + Arabic/RTL Support
+ *  تحسين مظهر الطرفية ودعم العربية واتجاه RTL
+ *--------------------------------------------------------------------------------------------*/
+
+/* Modern flat background with subtle gradient */
+.monaco-workbench .pane-body.integrated-terminal .terminal-outer-container,
+.monaco-workbench .terminal-editor .terminal-outer-container {
+	background-image: linear-gradient(180deg,
+		var(--vscode-terminal-background, var(--vscode-panel-background)) 0%,
+		color-mix(in srgb, var(--vscode-terminal-background, var(--vscode-panel-background)) 92%, var(--vscode-editor-background) 8%) 100%);
+}
+
+/* Tabs: rounded, soft, modern */
+.monaco-workbench .pane-body.integrated-terminal .terminal-tabs-entry {
+	border-radius: 6px;
+	margin: 2px 3px;
+	transition: background-color 140ms ease, color 140ms ease;
+}
+
+.monaco-workbench .pane-body.integrated-terminal .terminal-tabs-entry:hover {
+	background-color: var(--vscode-list-hoverBackground);
+}
+
+.monaco-workbench .pane-body.integrated-terminal .terminal-tabs-entry.is-active {
+	background-color: var(--vscode-list-activeSelectionBackground);
+	color: var(--vscode-list-activeSelectionForeground);
+}
+
+.monaco-workbench .pane-body.integrated-terminal .terminal-tabs-entry.is-active::before {
+	width: 2px !important;
+	border-radius: 2px;
+	left: 2px !important;
+}
+
+/* Toolbar area in terminal */
+.monaco-workbench .pane-body.integrated-terminal .tabs-container > .monaco-toolbar {
+	background-color: color-mix(in srgb, var(--vscode-panel-background) 90%, transparent);
+	border-bottom: 1px solid var(--vscode-panelSectionHeader-border, transparent);
+	padding: 4px 8px;
+}
+
+/* RTL: put the split borders on the right edge and align toolbars */
+html[dir="rtl"] .monaco-workbench .pane-body.integrated-terminal .terminal-group .monaco-split-view2.horizontal .split-view-view:not(:first-child) {
+	border-left-width: 0;
+	border-right-width: 1px;
+}
+
+html[dir="rtl"] .monaco-workbench .pane-body.integrated-terminal .split-view-view:first-child .tabs-container {
+	border-right-width: 0;
+	border-left-width: 1px;
+}
+
+html[dir="rtl"] .monaco-workbench .pane-body.integrated-terminal .split-view-view:last-child .tabs-container {
+	border-left-width: 0;
+	border-right-width: 1px;
+}
+
+html[dir="rtl"] .monaco-workbench .pane-body.integrated-terminal .tabs-container.has-text > .monaco-toolbar {
+	text-align: right;
+}
+
+html[dir="rtl"] .monaco-workbench .pane-body.integrated-terminal .terminal-tabs-entry.is-active::before {
+	left: auto;
+	right: 2px;
+}
+
+/* Arabic font: use a font that handles Arabic shaping well */
+html[dir="rtl"] .xterm,
+html[dir="rtl"] .xterm-viewport,
+html[dir="rtl"] .xterm-screen {
+	font-family: "Segoe UI", "Cascadia Code", "Noto Sans Arabic", "Tahoma", sans-serif;
+	direction: rtl;
+	unicode-bidi: embed;
+}
+
+/* Better bidi cursor alignment for Arabic prompts */
+html[dir="rtl"] .xterm-cursor-layer {
+	transform-origin: right top;
+}

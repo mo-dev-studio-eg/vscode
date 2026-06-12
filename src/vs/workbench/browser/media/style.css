@@ -32,6 +32,65 @@
 .monaco-workbench.windows { --monaco-monospace-font: Consolas, "Courier New", monospace; }
 .monaco-workbench.linux { --monaco-monospace-font: "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace; }
 
+/*---------------------------------------------------------------------------------------------
+ *  Arabic / RTL Support
+ *  دعم اللغة العربية واتجاه RTL على مستوى Workbench
+ *  These rules activate when <html dir="rtl"> is set (e.g. Arabic locale)
+ *--------------------------------------------------------------------------------------------*/
+
+/* Arabic-friendly system fonts for all platforms */
+.monaco-workbench:lang(ar),
+.monaco-workbench:lang(fa),
+.monaco-workbench:lang(he) {
+	font-family: "Segoe UI", "Noto Sans Arabic", "Tahoma", "Arial", system-ui, sans-serif;
+}
+
+.monaco-workbench.mac:lang(ar) { font-family: -apple-system, BlinkMacSystemFont, "Noto Sans Arabic", "Tahoma", sans-serif; }
+.monaco-workbench.windows:lang(ar) { font-family: "Segoe UI", "Noto Sans Arabic", "Tahoma", "Arial", sans-serif; }
+.monaco-workbench.linux:lang(ar) { font-family: system-ui, "Noto Sans Arabic", "Tahoma", "Ubuntu", "Droid Sans", sans-serif; }
+
+/* Flip common row chevrons / arrows in RTL */
+html[dir="rtl"] .monaco-workbench .codicon-chevron-right,
+html[dir="rtl"] .monaco-workbench .codicon-arrow-right {
+	transform: scaleX(-1);
+}
+
+html[dir="rtl"] .monaco-workbench .codicon-chevron-left,
+html[dir="rtl"] .monaco-workbench .codicon-arrow-left {
+	transform: scaleX(-1);
+}
+
+/* Mirror typical padding/margin a bit in lists for RTL */
+html[dir="rtl"] .monaco-workbench .monaco-list .monaco-list-row .monaco-icon-name-container {
+	padding-left: 0;
+	padding-right: 4px;
+}
+
+/* Status bar: align content to the start (right side in RTL) */
+html[dir="rtl"] .monaco-workbench .part.statusbar {
+	direction: rtl;
+}
+
+html[dir="rtl"] .monaco-workbench .part.statusbar > .items-container > .statusbar-item.left {
+	order: 99;
+}
+
+html[dir="rtl"] .monaco-workbench .part.statusbar > .items-container > .statusbar-item.right {
+	order: 0;
+}
+
+/* Panel/Tab titles: align right in RTL */
+html[dir="rtl"] .monaco-workbench .part.panel > .title > .title-label h2,
+html[dir="rtl"] .monaco-workbench .part.auxiliarybar > .title > .title-label h2,
+html[dir="rtl"] .monaco-workbench .part.titlebar > .title > .title-label h2 {
+	text-align: right;
+}
+
+/* Title bar controls (macOS traffic lights) */
+html[dir="rtl"] .monaco-workbench.mac .window-controls {
+	flex-direction: row-reverse;
+}
+
 /* Global Styles */
 
 body {
