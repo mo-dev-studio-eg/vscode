@@ -1,0 +1,94 @@
+name: Build App (All Platforms)
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  VSCODE_QUALITY: 'oss'
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            arch: x64
+            runner: ubuntu-22.04
+          - platform: win32
+            arch: x64
+            runner: windows-latest
+          - platform: darwin
+            arch: x64
+            runner: macos-13
+          - platform: darwin
+            arch: arm64
+            runner: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install Linux build dependencies
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update -y && sudo apt-get install -y build-essential pkg-config libx11-dev libx11-xcb-dev libxkbfile-dev libnotify-bin libkrb5-dev
+
+      - name: Install dependencies
+        run: |
+          set -e
+          for i in 1 2 3 4 5; do
+            npm ci && break
+            if [ "$i" -eq 5 ]; then
+              echo "npm ci failed too many times" >&2
+              exit 1
+            fi
+            echo "npm ci failed (attempt $i), retrying..."
+          done
+        shell: bash
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download built-in extensions
+        run: node build/lib/builtInExtensions.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build client (minified)
+        run: npm run gulp vscode-${{ matrix.platform }}-${{ matrix.arch }}-min
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Collect build output
+        shell: bash
+        run: |
+          set -e
+          mkdir -p build-output
+          mv "../VSCode-${{ matrix.platform }}-${{ matrix.arch }}" "build-output/"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VSCode-${{ matrix.platform }}-${{ matrix.arch }}
+          path: build-output
+          if-no-files-found: error
