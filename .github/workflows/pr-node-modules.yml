@@ -232,10 +232,30 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: Setup Visual Studio
-        uses: microsoft/setup-vscode@v1
-        with:
-          vsix-path: "*.vsix"
+      - name: Find Visual Studio Installation Path
+        shell: pwsh
+        id: vs-path
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (Test-Path $vswhere) {
+            $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+            if ($vsPath) {
+              echo "VS_PATH=$vsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+            }
+          } else {
+            $commonPaths = @("${env:ProgramFiles}\Microsoft Visual Studio\2022", "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022")
+            $vsTypes = @('Enterprise', 'Professional', 'Community', 'Preview', 'BuildTools')
+            foreach ($basePath in $commonPaths) {
+              foreach ($vsType in $vsTypes) {
+                $testPath = Join-Path $basePath $vsType
+                if (Test-Path $testPath) {
+                  $parentPath = (Get-Item $testPath).Parent.FullName
+                  echo "VS_PATH=$parentPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+                  exit 0
+                }
+              }
+            }
+          }
 
       - name: Prepare node_modules cache key
         shell: pwsh
@@ -274,6 +294,7 @@ jobs:
           npm_config_arch: ${{ env.NPM_ARCH }}
           npm_config_foreground_scripts: "true"
           VSCODE_ARCH: ${{ env.VSCODE_ARCH }}
+          VS2022_INSTALL: ${{ steps.vs-path.outputs.VS_PATH }}
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
           GITHUB_TOKEN: ${{ secrets.VSCODE_OSS }}

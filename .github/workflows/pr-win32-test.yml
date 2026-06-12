@@ -33,11 +33,6 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: Setup Visual Studio
-        uses: microsoft/setup-vscode@v1
-        with:
-          vsix-path: "*.vsix"
-
       - name: Find Visual Studio Installation Path
         shell: pwsh
         id: vs-path
@@ -46,22 +41,30 @@ jobs:
           if (Test-Path $vswhere) {
             $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
             if ($vsPath) {
-              echo "VS installation path: $vsPath"
-              Add-Content -Path $env:GITHUB_OUTPUT -Value "VS_PATH=$vsPath"
+              echo "VS_PATH=$vsPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+              Write-Host "Found VS at: $vsPath"
             }
           } else {
-            echo "vswhere not found, checking common locations..."
+            # Check common installation paths
             $commonPaths = @(
               "${env:ProgramFiles}\Microsoft Visual Studio\2022",
-              "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022"
+              "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022",
+              "C:\Program Files\Microsoft Visual Studio\2022",
+              "C:\Program Files (x86)\Microsoft Visual Studio\2022"
             )
-            foreach ($path in $commonPaths) {
-              if (Test-Path $path) {
-                echo "Found VS at: $path"
-                Add-Content -Path $env:GITHUB_OUTPUT -Value "VS_PATH=$path"
-                break
+            $vsTypes = @('Enterprise', 'Professional', 'Community', 'Preview', 'BuildTools')
+            foreach ($basePath in $commonPaths) {
+              foreach ($vsType in $vsTypes) {
+                $testPath = Join-Path $basePath $vsType
+                if (Test-Path $testPath) {
+                  $parentPath = (Get-Item $testPath).Parent.FullName
+                  echo "VS_PATH=$parentPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+                  Write-Host "Found VS at: $parentPath"
+                  exit 0
+                }
               }
             }
+            Write-Host "Warning: Visual Studio not found in common locations"
           }
 
       - name: Prepare node_modules cache key
@@ -111,6 +114,7 @@ jobs:
           npm_config_arch: ${{ env.NPM_ARCH }}
           npm_config_foreground_scripts: "true"
           VSCODE_ARCH: ${{ env.VSCODE_ARCH }}
+          VS2022_INSTALL: ${{ steps.vs-path.outputs.VS_PATH }}
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
