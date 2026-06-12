@@ -1,0 +1,125 @@
+/*---------------------------------------------------------------------------------------------
+ *  Sidebar Redesign (RTL + Modern Flat)
+ *  إعادة تصميم الشريط الجانبي - تصميم مسطح حديث مع دعم RTL
+ *  This stylesheet is additive; it overrides the original sidebar part
+ *  styling for a more modern, RTL-friendly look.
+ *--------------------------------------------------------------------------------------------*/
+
+/* ====== Layout / sizing ====== */
+.monaco-workbench .part.sidebar {
+	/* Modern soft surface with subtle gradient */
+	background-image: linear-gradient(180deg,
+		var(--vscode-sideBar-background) 0%,
+		color-mix(in srgb, var(--vscode-sideBar-background) 92%, var(--vscode-editor-background) 8%) 100%);
+	box-shadow: inset 0 0 0 1px var(--vscode-sideBar-border, transparent);
+	transition: width 180ms ease, background-color 160ms ease;
+}
+
+.monaco-workbench .part.sidebar > .title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	background-color: transparent;
+	border-bottom: 1px solid var(--vscode-sideBarSectionHeader-border, var(--vscode-sideBar-border, transparent));
+}
+
+.monaco-workbench .part.sidebar > .title > .title-label h2 {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--vscode-sideBarTitle-foreground);
+	opacity: 0.95;
+}
+
+/* ====== Composite bar (action chips) ====== */
+.monaco-workbench .part.sidebar > .title > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item .action-label {
+	border-radius: 8px;
+	transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.monaco-workbench .part.sidebar > .title > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:hover .action-label {
+	background-color: var(--vscode-toolbar-hoverBackground);
+	transform: translateY(-1px);
+}
+
+.monaco-workbench .part.sidebar > .title > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item.checked .action-label {
+	background-color: var(--vscode-toolbar-activeBackground, var(--vscode-list-activeSelectionBackground));
+	color: var(--vscode-toolbar-activeForeground, var(--vscode-list-activeSelectionForeground));
+}
+
+/* ====== Views / Pane body ====== */
+.monaco-workbench .part.sidebar .pane-body {
+	padding: 4px 0;
+}
+
+.monaco-workbench .part.sidebar .viewlet .collapsible.header {
+	border-top: 1px solid var(--vscode-sideBarSectionHeader-border, var(--vscode-sideBar-border, transparent));
+	padding: 4px 8px;
+	background-color: color-mix(in srgb, var(--vscode-sideBarSectionHeader-background, var(--vscode-sideBar-background)) 85%, transparent);
+}
+
+.monaco-workbench .part.sidebar .viewlet .collapsible.header .title {
+	font-weight: 600;
+	letter-spacing: 0.04em;
+}
+
+/* ====== Tree rows: smoother, modern ====== */
+.monaco-workbench .part.sidebar .monaco-list .monaco-list-row {
+	border-radius: 6px;
+	margin: 1px 6px;
+	padding-left: 4px;
+	padding-right: 4px;
+	transition: background-color 120ms ease;
+}
+
+.monaco-workbench .part.sidebar .monaco-list .monaco-list-row:hover {
+	background-color: var(--vscode-list-hoverBackground);
+}
+
+.monaco-workbench .part.sidebar .monaco-list .monaco-list-row.selected,
+.monaco-workbench .part.sidebar .monaco-list .monaco-list-row.focused {
+	background-color: var(--vscode-list-activeSelectionBackground);
+	color: var(--vscode-list-activeSelectionForeground);
+}
+
+.monaco-workbench .part.sidebar .monaco-list .monaco-list-row.focused {
+	outline: 1px solid var(--vscode-focusBorder);
+	outline-offset: -1px;
+}
+
+/* ====== Scrollbars in sidebar ====== */
+.monaco-workbench .part.sidebar .scrollbar > .slider {
+	border-radius: 4px;
+}
+
+/* ====== RTL: mirror paddings, align actions to start ====== */
+html[dir="rtl"] .monaco-workbench .part.sidebar > .title {
+	padding: 6px 10px;
+}
+
+html[dir="rtl"] .monaco-workbench .part.sidebar .monaco-list .monaco-list-row {
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+html[dir="rtl"] .monaco-workbench .part.sidebar .viewlet .collapsible.header .title {
+	text-align: right;
+}
+
+html[dir="rtl"] .monaco-workbench .part.sidebar > .title > .title-actions .actions-container {
+	justify-content: flex-start;
+}
+
+html[dir="rtl"] .monaco-workbench .part.sidebar > .title > .title-actions .action-item {
+	margin-right: 0;
+	margin-left: 4px;
+}
+
+/* ====== High contrast: keep crisp borders ====== */
+.hc-black .monaco-workbench .part.sidebar,
+.hc-light .monaco-workbench .part.sidebar {
+	background-image: none;
+	box-shadow: none;
+}
