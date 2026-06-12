@@ -33,6 +33,37 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      - name: Setup Visual Studio
+        uses: microsoft/setup-vscode@v1
+        with:
+          vsix-path: "*.vsix"
+
+      - name: Find Visual Studio Installation Path
+        shell: pwsh
+        id: vs-path
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (Test-Path $vswhere) {
+            $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+            if ($vsPath) {
+              echo "VS installation path: $vsPath"
+              Add-Content -Path $env:GITHUB_OUTPUT -Value "VS_PATH=$vsPath"
+            }
+          } else {
+            echo "vswhere not found, checking common locations..."
+            $commonPaths = @(
+              "${env:ProgramFiles}\Microsoft Visual Studio\2022",
+              "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022"
+            )
+            foreach ($path in $commonPaths) {
+              if (Test-Path $path) {
+                echo "Found VS at: $path"
+                Add-Content -Path $env:GITHUB_OUTPUT -Value "VS_PATH=$path"
+                break
+              }
+            }
+          }
+
       - name: Prepare node_modules cache key
         shell: pwsh
         run: |
