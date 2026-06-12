@@ -232,6 +232,11 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      - name: Setup Visual Studio
+        uses: microsoft/setup-vscode@v1
+        with:
+          vsix-path: "*.vsix"
+
       - name: Prepare node_modules cache key
         shell: pwsh
         run: |

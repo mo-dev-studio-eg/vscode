@@ -364,6 +364,11 @@ jobs:
         with:
           node-version: '22.21.x'
 
+      - name: Setup Visual Studio
+        uses: microsoft/setup-vscode@v1
+        with:
+          vsix-path: "*.vsix"
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
