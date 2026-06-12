@@ -106,3 +106,36 @@
 .monaco-workbench.context-menu-visible .explorer-folders-view.highlight .monaco-list-row {
 	outline: none !important;
 }
+
+/*---------------------------------------------------------------------------------------------
+ *  File Icon Polish + RTL tweaks
+ *  تحسين مظهر أيقونات الملفات ودعم RTL في المستكشف
+ *--------------------------------------------------------------------------------------------*/
+
+/* Slight visual lift for file/folder icons in the explorer */
+.explorer-folders-view .explorer-item .monaco-icon-label-container .codicon,
+.explorer-folders-view .explorer-item .monaco-icon-label-container .monaco-icon-label-container-icon {
+	transition: transform 120ms ease, filter 160ms ease;
+	filter: saturate(1.05);
+}
+
+.explorer-folders-view .monaco-list .monaco-list-row:hover .monaco-icon-label-container .codicon {
+	transform: scale(1.08);
+	filter: saturate(1.2);
+}
+
+/* Folder open icon nudge */
+.explorer-folders-view .monaco-list-row[aria-expanded="true"] .codicon-folder-opened {
+	color: var(--vscode-list-activeSelectionForeground, var(--vscode-symbolIcon-folderForeground));
+}
+
+/* RTL: mirror list indentation cue */
+html[dir="rtl"] .explorer-folders-view .explorer-item.align-nest-icon-with-parent-icon {
+	margin-left: 0;
+	margin-right: var(--vscode-explorer-align-offset-margin-left);
+}
+
+html[dir="rtl"] .explorer-folders-view .explorer-item .monaco-count-badge {
+	margin-left: 0;
+	margin-right: 5px;
+}
