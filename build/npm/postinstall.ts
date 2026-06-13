@@ -131,10 +131,23 @@ function setNpmrcConfig(dir: string, env: NodeJS.ProcessEnv) {
 	}
 
 	// Use our bundled node-gyp version
+	const bundledNodeGypBin = path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin');
 	env['npm_config_node_gyp'] =
 		process.platform === 'win32'
-			? path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin', 'node-gyp.cmd')
-			: path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin', 'node-gyp');
+			? path.join(bundledNodeGypBin, 'node-gyp.cmd')
+			: path.join(bundledNodeGypBin, 'node-gyp');
+
+	// Install scripts (e.g. sqlite3's `prebuild-install || node-gyp rebuild`) invoke
+	// `node-gyp` as a bare command, which the shell resolves from PATH or the local
+	// `node_modules/.bin/`. The locally installed copy is usually an older release
+	// (10.3.x for sqlite3) that mis-detects the unreleased "Visual Studio 18" as
+	// version `undefined`. Prepending the bundled .bin directory forces those
+	// scripts to pick up our 12.x node-gyp instead.
+	if (process.platform === 'win32') {
+		env['PATH'] = `${bundledNodeGypBin};${env['PATH'] ?? ''}`;
+	} else {
+		env['PATH'] = `${bundledNodeGypBin}:${env['PATH'] ?? ''}`;
+	}
 
 	// node-gyp 10.x misreads the unreleased "Visual Studio 18" (Enterprise
 	// preview) as version "undefined" and bails with
@@ -143,6 +156,17 @@ function setNpmrcConfig(dir: string, env: NodeJS.ProcessEnv) {
 	// VSCODE_MSVS_VERSION env var when a different toolchain is available.
 	if (process.platform === 'win32' && !env['GYP_MSVS_VERSION'] && !env['npm_config_msvs_version']) {
 		env['GYP_MSVS_VERSION'] = process.env['VSCODE_MSVS_VERSION'] || '2022';
+	}
+
+	// cl.exe defaults to a 1 MB stack reserve, which is too small for the
+	// binding code in some of our native modules (most recently @vscode/deviceid
+	// against Electron 42.3.0 headers, which crashes with 0xC0000409
+	// STATUS_STACK_BUFFER_OVERRUN). Bump the stack to 100 MB on Windows unless
+	// the caller pinned a value. /GS- is also added so that buffer overruns
+	// surface as a normal compiler error rather than a /GS cookie check abort.
+	const winClFlags = process.env['VSCODE_WIN_CL_FLAGS'] ?? '/F 100000000 /GS-';
+	if (process.platform === 'win32' && !env['CL']) {
+		env['CL'] = winClFlags;
 	}
 
 	// Force node-gyp to use process.config on macOS
