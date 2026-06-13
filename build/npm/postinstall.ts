@@ -131,10 +131,23 @@ function setNpmrcConfig(dir: string, env: NodeJS.ProcessEnv) {
 	}
 
 	// Use our bundled node-gyp version
+	const bundledNodeGypBin = path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin');
 	env['npm_config_node_gyp'] =
 		process.platform === 'win32'
-			? path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin', 'node-gyp.cmd')
-			: path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin', 'node-gyp');
+			? path.join(bundledNodeGypBin, 'node-gyp.cmd')
+			: path.join(bundledNodeGypBin, 'node-gyp');
+
+	// Install scripts (e.g. sqlite3's `prebuild-install || node-gyp rebuild`) invoke
+	// `node-gyp` as a bare command, which the shell resolves from PATH or the local
+	// `node_modules/.bin/`. The locally installed copy is usually an older release
+	// (10.3.x for sqlite3) that mis-detects the unreleased "Visual Studio 18" as
+	// version `undefined`. Prepending the bundled .bin directory forces those
+	// scripts to pick up our 12.x node-gyp instead.
+	if (process.platform === 'win32') {
+		env['PATH'] = `${bundledNodeGypBin};${env['PATH'] ?? ''}`;
+	} else {
+		env['PATH'] = `${bundledNodeGypBin}:${env['PATH'] ?? ''}`;
+	}
 
 	// node-gyp 10.x misreads the unreleased "Visual Studio 18" (Enterprise
 	// preview) as version "undefined" and bails with
