@@ -130,12 +130,20 @@ function setNpmrcConfig(dir: string, env: NodeJS.ProcessEnv) {
 		}
 	}
 
-	// Use our bundled node-gyp version
+	// Use our bundled node-gyp version. The bin dir is created at the start of
+	// main(); if for some reason it isn't there (e.g. an interrupted install),
+	// fall back to whatever `node-gyp` is on PATH so the call below still works.
 	const bundledNodeGypBin = path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin');
-	env['npm_config_node_gyp'] =
-		process.platform === 'win32'
-			? path.join(bundledNodeGypBin, 'node-gyp.cmd')
-			: path.join(bundledNodeGypBin, 'node-gyp');
+	const hasBundledNodeGyp =
+		fs.existsSync(path.join(bundledNodeGypBin, process.platform === 'win32' ? 'node-gyp.cmd' : 'node-gyp'));
+	if (hasBundledNodeGyp) {
+		env['npm_config_node_gyp'] =
+			process.platform === 'win32'
+				? path.join(bundledNodeGypBin, 'node-gyp.cmd')
+				: path.join(bundledNodeGypBin, 'node-gyp');
+	} else {
+		env['npm_config_node_gyp'] = 'node-gyp';
+	}
 
 	// Install scripts (e.g. sqlite3's `prebuild-install || node-gyp rebuild`) invoke
 	// `node-gyp` as a bare command, which the shell resolves from PATH or the local
@@ -143,10 +151,11 @@ function setNpmrcConfig(dir: string, env: NodeJS.ProcessEnv) {
 	// (10.3.x for sqlite3) that mis-detects the unreleased "Visual Studio 18" as
 	// version `undefined`. Prepending the bundled .bin directory forces those
 	// scripts to pick up our 12.x node-gyp instead.
-	if (process.platform === 'win32') {
-		env['PATH'] = `${bundledNodeGypBin};${env['PATH'] ?? ''}`;
-	} else {
-		env['PATH'] = `${bundledNodeGypBin}:${env['PATH'] ?? ''}`;
+	if (hasBundledNodeGyp) {
+		const pathSep = process.platform === 'win32' ? ';' : ':';
+		if (!(env['PATH'] ?? '').includes(bundledNodeGypBin)) {
+			env['PATH'] = `${bundledNodeGypBin}${pathSep}${env['PATH'] ?? ''}`;
+		}
 	}
 
 	// node-gyp 10.x misreads the unreleased "Visual Studio 18" (Enterprise
@@ -307,6 +316,31 @@ async function main() {
 		return;
 	}
 
+	// Eagerly install the bundled node-gyp at build/npm/gyp so the bin dir
+	// exists by the time we prepend it to PATH below. The bundled copy is
+	// what we want `node-gyp` to resolve to inside subdir install scripts
+	// (e.g. `extensions/copilot/node_modules/sqlite3` runs
+	// `prebuild-install -r napi || node-gyp rebuild` and ships with its own
+	// 10.3.1 node-gyp that mis-detects the unreleased "Visual Studio 18" as
+	// version `undefined` on Windows runners).
+	const gypDir = path.join(import.meta.dirname, 'gyp');
+	if (fs.existsSync(path.join(gypDir, 'package.json'))) {
+		const gypBin = path.join(gypDir, 'node_modules', '.bin');
+		if (!fs.existsSync(gypBin)) {
+			log('build/npm/gyp', 'Installing bundled node-gyp...');
+			const result = child_process.spawnSync(npm, ['ci', '--no-audit', '--no-fund'], {
+				cwd: gypDir,
+				env: { ...process.env },
+				stdio: 'inherit',
+				shell: true,
+			});
+			if (result.status !== 0) {
+				console.error(`ERR Bundled node-gyp install exited with code: ${result.status}`);
+				process.exit(result.status ?? 1);
+			}
+		}
+	}
+
 	// Set MSVS-related env vars on the parent process so they are inherited by
 	// every descendant, including install scripts that npm spawns via cmd.exe
 	// with a sanitized env (the per-dir env passed to npmInstallAsync does not
@@ -324,7 +358,7 @@ async function main() {
 		}
 		const bundledNodeGypBin = path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin');
 		const pathSep = ';';
-		if (!(process.env['PATH'] ?? '').includes(bundledNodeGypBin)) {
+		if (fs.existsSync(bundledNodeGypBin) && !(process.env['PATH'] ?? '').includes(bundledNodeGypBin)) {
 			process.env['PATH'] = `${bundledNodeGypBin}${pathSep}${process.env['PATH'] ?? ''}`;
 		}
 	}
