@@ -24,7 +24,7 @@ function log(dir: string, message: string) {
 function run(command: string, args: string[], opts: child_process.SpawnSyncOptions) {
 	log(opts.cwd as string || '.', '$ ' + command + ' ' + args.join(' '));
 
-	const result = child_process.spawnSync(command, args, opts);
+	const result = spawnWithShellHandlingSync(command, args, opts);
 
 	if (result.error) {
 		console.error(`ERR Failed to spawn process: ${result.error}`);
@@ -35,9 +35,41 @@ function run(command: string, args: string[], opts: child_process.SpawnSyncOptio
 	}
 }
 
+function quoteWindowsCmdArg(arg: string): string {
+	if (!arg) {
+		return '""';
+	}
+
+	if (!/[\s"&|<>^]/.test(arg)) {
+		return arg;
+	}
+
+	return `"${arg.replace(/"/g, '""')}"`;
+}
+
+function spawnWithShellHandlingSync(command: string, args: string[], opts: child_process.SpawnSyncOptions) {
+	if (process.platform === 'win32' && opts.shell) {
+		const comspec = process.env['ComSpec'] || 'C:\\Windows\\System32\\cmd.exe';
+		const commandLine = [command, ...args].map(quoteWindowsCmdArg).join(' ');
+		return child_process.spawnSync(comspec, ['/d', '/s', '/c', commandLine], { ...opts, shell: false });
+	}
+
+	return child_process.spawnSync(command, args, opts);
+}
+
+function spawnWithShellHandling(command: string, args: string[], opts: child_process.SpawnOptions) {
+	if (process.platform === 'win32' && opts.shell) {
+		const comspec = process.env['ComSpec'] || 'C:\\Windows\\System32\\cmd.exe';
+		const commandLine = [command, ...args].map(quoteWindowsCmdArg).join(' ');
+		return child_process.spawn(comspec, ['/d', '/s', '/c', commandLine], { ...opts, shell: false });
+	}
+
+	return child_process.spawn(command, args, opts);
+}
+
 function spawnAsync(command: string, args: string[], opts: child_process.SpawnOptions): Promise<string> {
 	return new Promise((resolve, reject) => {
-		const child = child_process.spawn(command, args, { ...opts, stdio: ['ignore', 'pipe', 'pipe'] });
+		const child = spawnWithShellHandling(command, args, { ...opts, stdio: ['ignore', 'pipe', 'pipe'] });
 		let output = '';
 		child.stdout?.on('data', (data: Buffer) => { output += data.toString(); });
 		child.stderr?.on('data', (data: Buffer) => { output += data.toString(); });
@@ -388,7 +420,7 @@ async function main() {
 		const gypBin = path.join(gypDir, 'node_modules', '.bin');
 		if (!fs.existsSync(gypBin)) {
 			log('build/npm/gyp', 'Installing bundled node-gyp...');
-			const result = child_process.spawnSync(npm, ['ci', '--no-audit', '--no-fund'], {
+			const result = spawnWithShellHandlingSync(npm, ['ci', '--no-audit', '--no-fund'], {
 				cwd: gypDir,
 				env: { ...process.env },
 				stdio: 'inherit',
