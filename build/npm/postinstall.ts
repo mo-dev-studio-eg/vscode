@@ -307,6 +307,28 @@ async function main() {
 		return;
 	}
 
+	// Set MSVS-related env vars on the parent process so they are inherited by
+	// every descendant, including install scripts that npm spawns via cmd.exe
+	// with a sanitized env (the per-dir env passed to npmInstallAsync does not
+	// always reach the deeply-nested `node-gyp` invocation that runs from
+	// `prebuild-install || node-gyp rebuild`).
+	if (process.platform === 'win32') {
+		if (!process.env['GYP_MSVS_VERSION']) {
+			process.env['GYP_MSVS_VERSION'] = process.env['VSCODE_MSVS_VERSION'] || '2022';
+		}
+		if (!process.env['npm_config_msvs_version']) {
+			process.env['npm_config_msvs_version'] = process.env['VSCODE_MSVS_VERSION'] || '2022';
+		}
+		if (!process.env['CL']) {
+			process.env['CL'] = process.env['VSCODE_WIN_CL_FLAGS'] ?? '/F 100000000 /GS-';
+		}
+		const bundledNodeGypBin = path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin');
+		const pathSep = ';';
+		if (!(process.env['PATH'] ?? '').includes(bundledNodeGypBin)) {
+			process.env['PATH'] = `${bundledNodeGypBin}${pathSep}${process.env['PATH'] ?? ''}`;
+		}
+	}
+
 	const _state = computeState();
 
 	const nativeTasks: (() => Promise<void>)[] = [];
