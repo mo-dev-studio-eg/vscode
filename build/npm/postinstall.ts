@@ -338,11 +338,6 @@ function getNpmrcConfigKeys(npmrcPath: string): string[] {
 }
 
 function clearInheritedNpmrcConfig(dir: string, env: NodeJS.ProcessEnv): void {
-	const dirNpmrcPath = path.join(root, dir, '.npmrc');
-	if (fs.existsSync(dirNpmrcPath)) {
-		return;
-	}
-
 	for (const key of rootNpmrcConfigKeys) {
 		const envKey = `npm_config_${key.replace(/-/g, '_')}`;
 		delete env[envKey];
