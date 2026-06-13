@@ -52,6 +52,26 @@ function spawnAsync(command: string, args: string[], opts: child_process.SpawnOp
 	});
 }
 
+// Retry a recursive delete on transient Windows file locks (EBUSY/EPERM).
+// On non-Windows the first attempt is taken without sleeping.
+function rmWithRetry(p: string, attempts = 5) {
+	for (let i = 0; i < attempts; i++) {
+		try {
+			fs.rmSync(p, { recursive: true, force: true });
+			return;
+		} catch (err) {
+			const code = (err as NodeJS.ErrnoException).code;
+			if ((code !== 'EBUSY' && code !== 'EPERM') || i === attempts - 1) {
+				throw err;
+			}
+			child_process.execSync(
+				process.platform === 'win32' ? 'ping -n 2 127.0.0.1 >nul' : 'sleep 0.5',
+				{ stdio: 'ignore', shell: true },
+			);
+		}
+	}
+}
+
 async function npmInstallAsync(dir: string, opts?: child_process.SpawnOptions): Promise<void> {
 	const finalOpts: child_process.SpawnOptions = {
 		env: { ...process.env },
@@ -116,6 +136,15 @@ function setNpmrcConfig(dir: string, env: NodeJS.ProcessEnv) {
 			? path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin', 'node-gyp.cmd')
 			: path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin', 'node-gyp');
 
+	// node-gyp 10.x misreads the unreleased "Visual Studio 18" (Enterprise
+	// preview) as version "undefined" and bails with
+	// "Could not find any Visual Studio installation to use". On Windows, pin
+	// the MSVS version the runner should look for first. Override with the
+	// VSCODE_MSVS_VERSION env var when a different toolchain is available.
+	if (process.platform === 'win32' && !env['GYP_MSVS_VERSION'] && !env['npm_config_msvs_version']) {
+		env['GYP_MSVS_VERSION'] = process.env['VSCODE_MSVS_VERSION'] || '2022';
+	}
+
 	// Force node-gyp to use process.config on macOS
 	// which defines clang variable as expected. Otherwise we
 	// run into compilation errors due to incorrect compiler
@@ -150,7 +179,16 @@ function removeParcelWatcherPrebuild(dir: string) {
 	for (const moduleName of parcelModules) {
 		if (moduleName.startsWith('watcher-')) {
 			const modulePath = path.join(parcelModuleFolder, moduleName);
-			fs.rmSync(modulePath, { recursive: true, force: true });
+			try {
+				rmWithRetry(modulePath);
+			} catch (err) {
+				const code = (err as NodeJS.ErrnoException).code;
+				if (code === 'EBUSY' || code === 'EPERM') {
+					log(dir, `EBUSY/EPERM removing ${modulePath} (will be retried on next install)`);
+					continue;
+				}
+				throw err;
+			}
 			log(dir, `Removed @parcel/watcher prebuilt module ${modulePath}`);
 		}
 	}
