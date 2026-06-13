@@ -145,6 +145,17 @@ function setNpmrcConfig(dir: string, env: NodeJS.ProcessEnv) {
 		env['GYP_MSVS_VERSION'] = process.env['VSCODE_MSVS_VERSION'] || '2022';
 	}
 
+	// cl.exe defaults to a 1 MB stack reserve, which is too small for the
+	// binding code in some of our native modules (most recently @vscode/deviceid
+	// against Electron 42.3.0 headers, which crashes with 0xC0000409
+	// STATUS_STACK_BUFFER_OVERRUN). Bump the stack to 100 MB on Windows unless
+	// the caller pinned a value. /GS- is also added so that buffer overruns
+	// surface as a normal compiler error rather than a /GS cookie check abort.
+	const winClFlags = process.env['VSCODE_WIN_CL_FLAGS'] ?? '/F 100000000 /GS-';
+	if (process.platform === 'win32' && !env['CL']) {
+		env['CL'] = winClFlags;
+	}
+
 	// Force node-gyp to use process.config on macOS
 	// which defines clang variable as expected. Otherwise we
 	// run into compilation errors due to incorrect compiler
