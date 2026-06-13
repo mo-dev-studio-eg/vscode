@@ -72,6 +72,53 @@ function rmWithRetry(p: string, attempts = 5) {
 	}
 }
 
+function getWindowsMsvsSpecifier(): string {
+	if (process.platform !== 'win32') {
+		return '2022';
+	}
+
+	if (process.env['VSCODE_MSVS_VERSION']) {
+		return process.env['VSCODE_MSVS_VERSION'];
+	}
+
+	const explicitInstalls = ['vs2026_install', 'vs2022_install', 'vs2019_install'];
+	for (const key of explicitInstalls) {
+		const installPath = process.env[key];
+		if (installPath && fs.existsSync(installPath)) {
+			return installPath;
+		}
+	}
+
+	const vswhere = path.join(
+		process.env['ProgramFiles(x86)'] ?? 'C:/Program Files (x86)',
+		'Microsoft Visual Studio',
+		'Installer',
+		'vswhere.exe',
+	);
+
+	if (fs.existsSync(vswhere)) {
+		try {
+			const installPath = child_process.execFileSync(vswhere, [
+				'-latest',
+				'-products',
+				'*',
+				'-requires',
+				'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+				'-property',
+				'installationPath',
+			], { encoding: 'utf8' }).trim();
+
+			if (installPath && fs.existsSync(installPath)) {
+				return installPath;
+			}
+		} catch {
+			// ignore and fall back to the last known compatible version below
+		}
+	}
+
+	return '2022';
+}
+
 async function npmInstallAsync(dir: string, opts?: child_process.SpawnOptions): Promise<void> {
 	const finalOpts: child_process.SpawnOptions = {
 		env: { ...process.env },
@@ -83,14 +130,9 @@ async function npmInstallAsync(dir: string, opts?: child_process.SpawnOptions): 
 	const command = process.env['npm_command'] || 'install';
 	const commandArgs = command.split(' ');
 	if (process.platform === 'win32') {
-		const msvsVersion = process.env['VSCODE_MSVS_VERSION'] || '2022';
+		const msvsVersion = getWindowsMsvsSpecifier();
 		if (!commandArgs.some(arg => arg.startsWith('--msvs_version='))) {
 			commandArgs.push(`--msvs_version=${msvsVersion}`);
-		}
-
-		const bundledNodeGyp = path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin', 'node-gyp.cmd');
-		if (fs.existsSync(bundledNodeGyp) && !commandArgs.some(arg => arg.startsWith('--node_gyp='))) {
-			commandArgs.push(`--node_gyp=${bundledNodeGyp}`);
 		}
 	}
 
@@ -176,7 +218,7 @@ function setNpmrcConfig(dir: string, env: NodeJS.ProcessEnv) {
 	// the MSVS version the runner should look for first. Override with the
 	// VSCODE_MSVS_VERSION env var when a different toolchain is available.
 	if (process.platform === 'win32') {
-		const msvsVersion = process.env['VSCODE_MSVS_VERSION'] || '2022';
+		const msvsVersion = getWindowsMsvsSpecifier();
 		if (!env['GYP_MSVS_VERSION']) {
 			env['GYP_MSVS_VERSION'] = msvsVersion;
 		}
@@ -365,11 +407,12 @@ async function main() {
 	// always reach the deeply-nested `node-gyp` invocation that runs from
 	// `prebuild-install || node-gyp rebuild`).
 	if (process.platform === 'win32') {
+		const msvsVersion = getWindowsMsvsSpecifier();
 		if (!process.env['GYP_MSVS_VERSION']) {
-			process.env['GYP_MSVS_VERSION'] = process.env['VSCODE_MSVS_VERSION'] || '2022';
+			process.env['GYP_MSVS_VERSION'] = msvsVersion;
 		}
 		if (!process.env['npm_config_msvs_version']) {
-			process.env['npm_config_msvs_version'] = process.env['VSCODE_MSVS_VERSION'] || '2022';
+			process.env['npm_config_msvs_version'] = msvsVersion;
 		}
 		if (!process.env['CL']) {
 			process.env['CL'] = process.env['VSCODE_WIN_CL_FLAGS'] ?? '/F 100000000 /GS-';
