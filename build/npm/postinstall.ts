@@ -81,6 +81,18 @@ async function npmInstallAsync(dir: string, opts?: child_process.SpawnOptions): 
 	};
 
 	const command = process.env['npm_command'] || 'install';
+	const commandArgs = command.split(' ');
+	if (process.platform === 'win32') {
+		const msvsVersion = process.env['VSCODE_MSVS_VERSION'] || '2022';
+		if (!commandArgs.some(arg => arg.startsWith('--msvs_version='))) {
+			commandArgs.push(`--msvs_version=${msvsVersion}`);
+		}
+
+		const bundledNodeGyp = path.join(import.meta.dirname, 'gyp', 'node_modules', '.bin', 'node-gyp.cmd');
+		if (fs.existsSync(bundledNodeGyp) && !commandArgs.some(arg => arg.startsWith('--node_gyp='))) {
+			commandArgs.push(`--node_gyp=${bundledNodeGyp}`);
+		}
+	}
 
 	if (process.env['VSCODE_REMOTE_DEPENDENCIES_CONTAINER_NAME'] && /^(.build\/distro\/npm\/)?remote$/.test(dir)) {
 		const syncOpts: child_process.SpawnSyncOptions = {
@@ -108,7 +120,7 @@ async function npmInstallAsync(dir: string, opts?: child_process.SpawnOptions): 
 		run('sudo', ['chown', '-R', `${userinfo.uid}:${userinfo.gid}`, `${path.resolve(root, dir)}`], syncOpts);
 	} else {
 		log(dir, 'Installing dependencies...');
-		const output = await spawnAsync(npm, command.split(' '), finalOpts);
+		const output = await spawnAsync(npm, commandArgs, finalOpts);
 		if (output.trim()) {
 			for (const line of output.trim().split('\n')) {
 				log(dir, line);
@@ -158,13 +170,19 @@ function setNpmrcConfig(dir: string, env: NodeJS.ProcessEnv) {
 		}
 	}
 
-	// node-gyp 10.x misreads the unreleased "Visual Studio 18" (Enterprise
-	// preview) as version "undefined" and bails with
+	// node-gyp can misread the unreleased "Visual Studio 18" (Enterprise
+	// preview) as version "undefined" and bail with
 	// "Could not find any Visual Studio installation to use". On Windows, pin
 	// the MSVS version the runner should look for first. Override with the
 	// VSCODE_MSVS_VERSION env var when a different toolchain is available.
-	if (process.platform === 'win32' && !env['GYP_MSVS_VERSION'] && !env['npm_config_msvs_version']) {
-		env['GYP_MSVS_VERSION'] = process.env['VSCODE_MSVS_VERSION'] || '2022';
+	if (process.platform === 'win32') {
+		const msvsVersion = process.env['VSCODE_MSVS_VERSION'] || '2022';
+		if (!env['GYP_MSVS_VERSION']) {
+			env['GYP_MSVS_VERSION'] = msvsVersion;
+		}
+		if (!env['npm_config_msvs_version']) {
+			env['npm_config_msvs_version'] = msvsVersion;
+		}
 	}
 
 	// cl.exe defaults to a 1 MB stack reserve, which is too small for the
