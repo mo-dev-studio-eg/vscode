@@ -75,43 +75,62 @@ if (process.arch !== os.arch()) {
 	console.error(`\x1b[1;31m*** This can greatly increase the build time of vs code. ***\x1b[0;0m`);
 }
 
-function hasSupportedVisualStudioVersion() {
+function hasSupportedVisualStudioVersion(): boolean {
 	// Translated over from
 	// https://source.chromium.org/chromium/chromium/src/+/master:build/vs_toolchain.py;l=140-175
 	const supportedVersions = ['2022', '2019'];
 
-	const availableVersions = [];
 	for (const version of supportedVersions) {
 		// Check environment variable first (explicit override)
-		let vsPath = process.env[`vs${version}_install`];
-		if (vsPath && fs.existsSync(vsPath)) {
-			availableVersions.push(version);
-			break;
+		const envPath = process.env[`vs${version}_install`];
+		if (envPath && fs.existsSync(envPath)) {
+			return true;
 		}
+	}
 
-		// Check default installation paths
-		const programFiles86Path = process.env['ProgramFiles(x86)'];
-		const programFiles64Path = process.env['ProgramFiles'];
+	// Try to locate any supported installation via vswhere.exe (ships with the
+	// Visual Studio Installer). This catches installs in non-default locations
+	// (e.g. drive roots, custom directories) that the path-based scan below misses.
+	const vswhere = path.join(
+		process.env['ProgramFiles(x86)'] ?? 'C:/Program Files (x86)',
+		'Microsoft Visual Studio', 'Installer', 'vswhere.exe'
+	);
+	if (fs.existsSync(vswhere)) {
+		try {
+			const out = child_process.execFileSync(vswhere, [
+				'-latest', '-products', '*',
+				'-requires', 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+				'-property', 'installationPath'
+			], { encoding: 'utf8' }).trim();
+			if (out && fs.existsSync(out)) {
+				return true;
+			}
+		} catch {
+			// ignore — fall through to the path-based scan
+		}
+	}
 
-		const vsTypes = ['Enterprise', 'Professional', 'Community', 'Preview', 'BuildTools', 'IntPreview'];
+	// Fall back to the default installation paths
+	const programFiles86Path = process.env['ProgramFiles(x86)'];
+	const programFiles64Path = process.env['ProgramFiles'];
+
+	const vsTypes = ['Enterprise', 'Professional', 'Community', 'Preview', 'BuildTools', 'IntPreview'];
+	for (const version of supportedVersions) {
 		if (programFiles64Path) {
-			vsPath = `${programFiles64Path}/Microsoft Visual Studio/${version}`;
-			if (vsTypes.some(vsType => fs.existsSync(path.join(vsPath!, vsType)))) {
-				availableVersions.push(version);
-				break;
+			const base = path.join(programFiles64Path, 'Microsoft Visual Studio', version);
+			if (vsTypes.some(vsType => fs.existsSync(path.join(base, vsType)))) {
+				return true;
 			}
 		}
-
 		if (programFiles86Path) {
-			vsPath = `${programFiles86Path}/Microsoft Visual Studio/${version}`;
-			if (vsTypes.some(vsType => fs.existsSync(path.join(vsPath!, vsType)))) {
-				availableVersions.push(version);
-				break;
+			const base = path.join(programFiles86Path, 'Microsoft Visual Studio', version);
+			if (vsTypes.some(vsType => fs.existsSync(path.join(base, vsType)))) {
+				return true;
 			}
 		}
 	}
 
-	return availableVersions.length;
+	return false;
 }
 
 function installHeaders() {
