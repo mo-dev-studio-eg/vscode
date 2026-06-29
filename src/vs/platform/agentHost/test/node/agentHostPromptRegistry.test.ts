@@ -8,11 +8,11 @@ import type { SectionOverride, SystemMessageSection } from '@github/copilot-sdk'
 import { AgentHostConfigKey, agentHostCustomizationConfigSchema } from '../../common/agentHostCustomizationConfig.js';
 import type { SchemaValues } from '../../common/agentHostSchema.js';
 import type { ModelSelection } from '../../common/state/protocol/state.js';
-import { AgentHostPromptRegistry, agentHostPromptRegistry, type IAgentHostPromptContext } from '../../node/copilot/prompts/promptRegistry.js';
-import { COPILOT_AGENT_HOST_SYSTEM_MESSAGE } from '../../node/copilot/prompts/systemMessage.js';
+import { AgentHostPromptRegistry, agentHostPromptRegistry, type IAgentHostPromptContext } from '../../node/redex/prompts/promptRegistry.js';
+import { COPILOT_AGENT_HOST_SYSTEM_MESSAGE } from '../../node/redex/prompts/systemMessage.js';
 import { BrowserChatToolReferenceName } from '../../../browserView/common/browserChatToolReferenceNames.js';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
-import '../../node/copilot/prompts/allPrompts.js';
+import '../../node/redex/prompts/allPrompts.js';
 
 /**
  * Builds a prompt context backed by an in-memory bag of customization settings

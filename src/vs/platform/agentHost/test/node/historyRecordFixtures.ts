@@ -9,7 +9,7 @@ import { isString } from '../../../../base/common/types.js';
 import { stripRedundantCdPrefix } from '../../common/commandLineHelpers.js';
 import { IFileEditRecord, ISessionDatabase } from '../../common/sessionDataService.js';
 import { MessageKind, ResponsePartKind, ToolCallConfirmationReason, ToolCallStatus, ToolResultContentType, TurnState, buildSubagentSessionUri, type Message, type ResponsePart, type StringOrMarkdown, type ToolCallCompletedState, type ToolResultContent, type Turn } from '../../common/state/sessionState.js';
-import { getInvocationMessage, getPastTenseMessage, getShellLanguage, getSubagentMetadata, getToolDisplayName, getToolInputString, getToolKind, isEditTool, isHiddenTool, synthesizeSkillToolCall } from '../../node/copilot/copilotToolDisplay.js';
+import { getInvocationMessage, getPastTenseMessage, getShellLanguage, getSubagentMetadata, getToolDisplayName, getToolInputString, getToolKind, isEditTool, isHiddenTool, synthesizeSkillToolCall } from '../../node/redex/copilotToolDisplay.js';
 import { buildSessionDbUri } from '../../node/shared/fileEditTracker.js';
 import type { ISessionEvent, ISessionEventMessage, ISessionEventSkillInvoked, ISessionEventSubagentStarted, ISessionEventToolComplete, ISessionEventToolStart } from './copilotTestEvents.js';
 
@@ -23,7 +23,7 @@ import type { ISessionEvent, ISessionEventMessage, ISessionEventSkillInvoked, IS
 // emulating.
 //
 // Production code does NOT depend on this module. The real
-// SDK-events-to-Turn[] pipeline in `node/copilot/mapSessionEvents.ts` runs
+// SDK-events-to-Turn[] pipeline in `node/redex/mapSessionEvents.ts` runs
 // in a single pass without producing the intermediate record shape.
 // =============================================================================
 

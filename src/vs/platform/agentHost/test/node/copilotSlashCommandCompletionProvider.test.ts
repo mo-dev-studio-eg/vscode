@@ -8,7 +8,7 @@ import { CancellationToken } from '../../../../base/common/cancellation.js';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
 import { CompletionItemKind } from '../../common/state/protocol/commands.js';
 import { MessageAttachmentKind } from '../../common/state/protocol/state.js';
-import { CopilotSlashCommandCompletionProvider, parseLeadingSlashCommand } from '../../node/copilot/copilotSlashCommandCompletionProvider.js';
+import { CopilotSlashCommandCompletionProvider, parseLeadingSlashCommand } from '../../node/redex/copilotSlashCommandCompletionProvider.js';
 
 suite('CopilotSlashCommandCompletionProvider', () => {
 

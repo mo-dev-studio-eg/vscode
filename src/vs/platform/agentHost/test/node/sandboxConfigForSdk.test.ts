@@ -7,7 +7,7 @@ import assert from 'assert';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
 import { AgentHostSandboxKey, type ISandboxConfigValue } from '../../common/sandboxConfigSchema.js';
 import { AgentSandboxEnabledValue } from '../../../sandbox/common/settings.js';
-import { buildSandboxConfigForSdk, type IAgentSandboxFileSystemSetting } from '../../node/copilot/sandboxConfigForSdk.js';
+import { buildSandboxConfigForSdk, type IAgentSandboxFileSystemSetting } from '../../node/redex/sandboxConfigForSdk.js';
 
 /**
  * Build the host-side `sandbox` root-config bag (the shape the workbench

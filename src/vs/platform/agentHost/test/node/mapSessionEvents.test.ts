@@ -7,7 +7,7 @@ import assert from 'assert';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
 import { AgentSession } from '../../common/agentService.js';
 import { MessageAttachmentKind, ResponsePartKind, type ResponsePart } from '../../common/state/sessionState.js';
-import { mapSessionEvents } from '../../node/copilot/mapSessionEvents.js';
+import { mapSessionEvents } from '../../node/redex/mapSessionEvents.js';
 import { toSessionEvents, type ISessionEvent } from './copilotTestEvents.js';
 
 suite('mapSessionEvents — task_complete rendering', () => {
