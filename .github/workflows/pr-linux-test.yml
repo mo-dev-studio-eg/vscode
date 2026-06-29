@@ -83,6 +83,7 @@ jobs:
             echo "Npm install failed $i, trying again..."
           done
         env:
+          npm_config_ignore_scripts: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
@@ -102,6 +103,7 @@ jobs:
           done
         env:
           npm_config_arch: ${{ env.NPM_ARCH }}
+          npm_config_ignore_scripts: true
           VSCODE_ARCH: ${{ env.VSCODE_ARCH }}
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
