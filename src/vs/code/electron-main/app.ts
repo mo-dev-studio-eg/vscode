@@ -48,6 +48,7 @@ import { IExtensionHostStarter, ipcExtensionHostStarterChannelName } from '../..
 import { ExtensionHostStarter } from '../../platform/extensions/electron-main/extensionHostStarter.js';
 import { IExternalTerminalMainService } from '../../platform/externalTerminal/electron-main/externalTerminal.js';
 import { LinuxExternalTerminalService, MacExternalTerminalService, WindowsExternalTerminalService } from '../../platform/externalTerminal/node/externalTerminalService.js';
+import { StubUpdateService } from '../../platform/update/electron-main/updateService.stub.js';
 import { ISandboxHelperMainService } from '../../platform/sandbox/electron-main/sandboxHelperService.js';
 import { SandboxHelperService } from '../../platform/sandbox/node/sandboxHelper.js';
 import { LOCAL_FILE_SYSTEM_CHANNEL_NAME } from '../../platform/files/common/diskFileSystemProviderClient.js';
@@ -1081,9 +1082,6 @@ export class CodeApplication extends Disposable {
 		const services = new ServiceCollection();
 
 		// Update - DISABLED in Redex
-		// All update services have been replaced with StubUpdateService
-		// to remove Microsoft telemetry and update functionality
-		import { StubUpdateService } from '../../platform/update/electron-main/updateService.stub.js';
 		services.set(IUpdateService, new SyncDescriptor(StubUpdateService));
 
 		// Windows
