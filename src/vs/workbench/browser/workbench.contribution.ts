@@ -104,17 +104,17 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			'workbench.editor.decorations.badges': {
 				'type': 'boolean',
 				'markdownDescription': localize('decorations.badges', "Controls whether editor file decorations should use badges."),
-				'default': true
+				'default': false
 			},
 			'workbench.editor.decorations.colors': {
 				'type': 'boolean',
 				'markdownDescription': localize('decorations.colors', "Controls whether editor file decorations should use colors."),
-				'default': true
+				'default': false
 			},
 			[CustomEditorLabelService.SETTING_ID_ENABLED]: {
 				'type': 'boolean',
 				'markdownDescription': localize('workbench.editor.label.enabled', "Controls whether the custom workbench editor labels should be applied."),
-				'default': true,
+				'default': false,
 			},
 			[CustomEditorLabelService.SETTING_ID_PATTERNS]: {
 				'type': 'object',
@@ -292,29 +292,29 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			'workbench.editor.splitOnDragAndDrop': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('splitOnDragAndDrop', "Controls if editor groups can be split from drag and drop operations by dropping an editor or file on the edges of the editor area."),
 				'keywords': ['pane']
 			},
 			'workbench.editor.dragToOpenWindow': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'markdownDescription': localize('dragToOpenWindow', "Controls if editors can be dragged out of the window to open them in a new window. Press and hold the `Alt` key while dragging to toggle this dynamically.")
 			},
 			'workbench.editor.focusRecentEditorAfterClose': {
 				'type': 'boolean',
 				'description': localize('focusRecentEditorAfterClose', "Controls whether editors are closed in most recently used order or from left to right."),
-				'default': true
+				'default': false
 			},
 			'workbench.editor.showIcons': {
 				'type': 'boolean',
 				'description': localize('showIcons', "Controls whether opened editors should show with an icon or not. This requires a file icon theme to be enabled as well."),
-				'default': true
+				'default': false
 			},
 			'workbench.editor.enablePreview': {
 				'type': 'boolean',
 				'description': localize('enablePreview', "Controls whether preview mode is used when editors open. There is a maximum of one preview mode editor per editor group. This editor displays its filename in italics on its tab or title label and in the Open Editors view. Its contents will be replaced by the next editor opened in preview mode. Making a change in a preview mode editor will persist it, as will a double-click on its label, or the 'Keep Open' option in its label context menu. Opening a file from Explorer with a double-click persists its editor immediately."),
-				'default': true
+				'default': false
 			},
 			'workbench.editor.enablePreviewFromQuickOpen': {
 				'type': 'boolean',
@@ -346,7 +346,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			'workbench.editor.closeEmptyGroups': {
 				'type': 'boolean',
 				'description': localize('closeEmptyGroups', "Controls the behavior of empty editor groups when the last tab in the group is closed. When enabled, empty groups will automatically close. When disabled, empty groups will remain part of the grid."),
-				'default': true,
+				'default': false,
 				'keywords': ['pane']
 			},
 			'workbench.editor.revealIfOpen': {
@@ -375,7 +375,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			'workbench.editor.mouseBackForwardToNavigate': {
 				'type': 'boolean',
 				'description': localize('mouseBackForwardToNavigate', "Enables the use of mouse buttons four and five for commands 'Go Back' and 'Go Forward'."),
-				'default': true
+				'default': false
 			},
 			'workbench.editor.navigationScope': {
 				'type': 'string',
@@ -391,7 +391,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			'workbench.editor.restoreViewState': {
 				'type': 'boolean',
 				'markdownDescription': localize('restoreViewState', "Restores the last editor view state (such as scroll position) when re-opening editors after they have been closed. Editor view state is stored per editor group and discarded when a group closes. Use the {0} setting to use the last known view state across all editor groups in case no previous view state was found for a editor group.", '`#workbench.editor.sharedViewState#`'),
-				'default': true,
+				'default': false,
 				'scope': ConfigurationScope.LANGUAGE_OVERRIDABLE
 			},
 			'workbench.editor.sharedViewState': {
@@ -402,7 +402,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			'workbench.editor.restoreEditors': {
 				'type': 'boolean',
 				'description': localize('restoreOnStartup', "Controls whether editors are restored on startup. When disabled, only dirty editors will be restored from the previous session."),
-				'default': true,
+				'default': false,
 				agentsWindow: { default: false, readOnly: true },
 			},
 			'workbench.editor.splitInGroupLayout': {
@@ -417,7 +417,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			'workbench.editor.centeredLayoutAutoResize': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('centeredLayoutAutoResize', "Controls if the centered layout should automatically resize to maximum width when more than one group is open. Once only one group is open it will resize back to the original centered width.")
 			},
 			'workbench.editor.centeredLayoutFixedWidth': {
@@ -460,7 +460,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			'workbench.localHistory.enabled': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('localHistoryEnabled', "Controls whether local file history is enabled. When enabled, the file contents of an editor that is saved will be stored to a backup location to be able to restore or review the contents later. Changing this setting has no effect on existing local file history entries."),
 				'scope': ConfigurationScope.RESOURCE
 			},
@@ -525,18 +525,18 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 				'type': 'boolean',
 				tags: ['experimental'],
 				'description': localize('showAskInChat', "Controls whether the command palette shows 'Ask in Chat' option at the bottom."),
-				'default': true
+				'default': false
 			},
 			'workbench.commandPalette.experimental.enableNaturalLanguageSearch': {
 				'type': 'boolean',
 				tags: ['experimental'],
 				'description': localize('enableNaturalLanguageSearch', "Controls whether the command palette should include similar commands. You must have an extension installed that provides Natural Language support."),
-				'default': true
+				'default': false
 			},
 			'workbench.quickOpen.closeOnFocusLost': {
 				'type': 'boolean',
 				'description': localize('closeOnFocusLost', "Controls whether Quick Open should close automatically once it loses focus."),
-				'default': true
+				'default': false
 			},
 			'workbench.quickOpen.preserveInput': {
 				'type': 'boolean',
@@ -572,7 +572,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			'workbench.panel.showLabels': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('panelShowLabels', "Controls whether activity items in the panel title are shown as label or icon."),
 			},
 			'workbench.panel.defaultLocation': {
@@ -617,13 +617,13 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			'workbench.secondarySideBar.showLabels': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'markdownDescription': localize('secondarySideBarShowLabels', "Controls whether activity items in the secondary side bar title are shown as label or icon. This setting only has an effect when {0} is not set to {1}.", '`#workbench.activityBar.location#`', '`top`'),
 				agentsWindow: { default: true, readOnly: true },
 			},
 			'workbench.statusBar.visible': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('statusBarVisibility', "Controls the visibility of the status bar at the bottom of the workbench."),
 				agentsWindow: { default: false, readOnly: true },
 			},
@@ -644,7 +644,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			[NotificationsSettings.NOTIFICATIONS_BUTTON]: {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('notificationsButton', "Controls the visibility of the Notifications button in the title bar. Only applies when notifications are positioned at the top right.")
 			},
 			[LayoutSettings.ACTIVITY_BAR_LOCATION]: {
@@ -727,7 +727,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			'workbench.settings.showAISearchToggle': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('settings.showAISearchToggle', "Controls whether the AI search results toggle is shown in the search bar in the Settings editor after doing a search and once AI search results are available."),
 			},
 			'workbench.hover.delay': {
@@ -770,7 +770,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			'workbench.navigationControl.enabled': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'markdownDescription': isWeb ?
 					localize('navigationControlEnabledWeb', "Controls whether the navigation control in the title bar is shown.") :
 					localize({ key: 'navigationControlEnabled', comment: ['{0}, {1} is a placeholder for a setting identifier.'] }, "Controls whether the navigation control is shown in the custom title bar. This setting only has an effect when {0} is not set to {1}.", '`#window.customTitleBarVisibility#`', '`never`'),
@@ -778,7 +778,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			[LayoutSettings.LAYOUT_ACTIONS]: {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'markdownDescription': isWeb ?
 					localize('layoutControlEnabledWeb', "Controls whether the layout control in the title bar is shown.") :
 					localize({ key: 'layoutControlEnabled', comment: ['{0}, {1} is a placeholder for a setting identifier.'] }, "Controls whether the layout control is shown in the custom title bar. This setting only has an effect when {0} is not set to {1}.", '`#window.customTitleBarVisibility#`', '`never`'),
@@ -798,13 +798,13 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			'workbench.tips.enabled': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('tips.enabled', "When enabled, will show the watermark tips when no editor is open."),
 				agentsWindow: { default: false },
 			},
 			[LayoutSettings.SHADOWS]: {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('shadows', "Controls whether shadow effects are shown around the side panels and other workbench elements.")
 			},
 			[LayoutSettings.MODERN_UI]: {
@@ -888,14 +888,14 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 			},
 			'window.enableMenuBarMnemonics': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'scope': ConfigurationScope.APPLICATION,
 				'description': localize('enableMenuBarMnemonics', "Controls whether the main menus can be opened via Alt-key shortcuts. Disabling mnemonics allows to bind these Alt-key shortcuts to editor commands instead."),
 				'included': isWindows || isLinux
 			},
 			'window.customMenuBarAltFocus': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'scope': ConfigurationScope.APPLICATION,
 				'markdownDescription': localize('customMenuBarAltFocus', "Controls whether the menu bar will be focused by pressing the Alt-key. This setting has no effect on toggling the menu bar with the Alt-key."),
 				'included': isWindows || isLinux,
@@ -962,7 +962,7 @@ const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Con
 		'properties': {
 			'problems.visibility': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('problems.visibility', "Controls whether the problems are visible throughout the editor and workbench."),
 			},
 		}

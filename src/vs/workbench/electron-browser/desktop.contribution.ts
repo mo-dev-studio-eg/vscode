@@ -165,7 +165,7 @@ import product from '../../platform/product/common/product.js';
 		'properties': {
 			'window.confirmSaveUntitledWorkspace': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('confirmSaveUntitledWorkspace', "Controls whether a confirmation dialog shows asking to save or discard an opened untitled workspace in the window when switching to another workspace. Disabling the confirmation dialog will always discard the untitled workspace."),
 			},
 			'window.openWithoutArgumentsInNewWindow': {
@@ -210,7 +210,7 @@ import product from '../../platform/product/common/product.js';
 			},
 			'window.zoomPerWindow': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'markdownDescription': localize({ comment: ['{0} will be a setting name rendered as a link'], key: 'zoomPerWindow' }, "Controls if the 'Zoom In' and 'Zoom Out' commands apply the zoom level to all windows or only the active window. See {0} for configuring a default zoom level for all windows.", '`#window.zoomLevel#`'),
 				tags: ['accessibility']
 			},
@@ -304,14 +304,14 @@ import product from '../../platform/product/common/product.js';
 			},
 			'window.nativeFullScreen': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('window.nativeFullScreen', "Controls if native full-screen should be used on macOS. Disable this option to prevent macOS from creating a new space when going full-screen."),
 				'scope': ConfigurationScope.APPLICATION,
 				'included': isMacintosh
 			},
 			'window.clickThroughInactive': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'scope': ConfigurationScope.APPLICATION,
 				'description': localize('window.clickThroughInactive', "If enabled, clicking on an inactive window will both activate the window and trigger the element under the mouse if it is clickable. If disabled, clicking anywhere on an inactive window will activate it only and a second click is required on the element."),
 				'included': isMacintosh
@@ -346,7 +346,7 @@ import product from '../../platform/product/common/product.js';
 			'telemetry.enableCrashReporter': {
 				'type': 'boolean',
 				'description': localize('telemetry.enableCrashReporting', "Enable crash reports to be collected. This helps us improve stability. \nThis option requires restart to take effect."),
-				'default': true,
+				'default': false,
 				'tags': ['usesOnlineServices', 'telemetry'],
 				'markdownDeprecationMessage': localize('enableCrashReporterDeprecated', "If this setting is false, no telemetry will be sent regardless of the new setting's value. Deprecated due to being combined into the {0} setting.", `\`#${TELEMETRY_SETTING_ID}#\``),
 			}
@@ -362,7 +362,7 @@ import product from '../../platform/product/common/product.js';
 		'properties': {
 			'keyboard.touchbar.enabled': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'description': localize('touchbar.enabled', "Enables the macOS touchbar buttons on the keyboard if available."),
 				'included': isMacintosh
 			},
@@ -384,13 +384,13 @@ import product from '../../platform/product/common/product.js';
 		'properties': {
 			'security.promptForLocalFileProtocolHandling': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'markdownDescription': localize('security.promptForLocalFileProtocolHandling', 'If enabled, a dialog will ask for confirmation whenever a local file or workspace is about to open through a protocol handler.'),
 				'scope': ConfigurationScope.APPLICATION
 			},
 			'security.promptForRemoteFileProtocolHandling': {
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'markdownDescription': localize('security.promptForRemoteFileProtocolHandling', 'If enabled, a dialog will ask for confirmation whenever a remote file or workspace is about to open through a protocol handler.'),
 				'scope': ConfigurationScope.APPLICATION
 			}
