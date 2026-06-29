@@ -136,6 +136,7 @@
     "@xterm/headless": "^6.1.0-beta.285",
     "@xterm/xterm": "^6.1.0-beta.285",
     "chrome-remote-interface": "^0.33.0",
+    "cpu-features": "0.0.10",
     "detect-libc": "^2.1.2",
     "http-proxy-agent": "^7.0.0",
     "https-proxy-agent": "^7.0.2",
@@ -276,7 +277,6 @@
     },
     "serialize-javascript": "^7.0.3",
     "ssh2": {
-      "cpu-features": "0.0.0"
     },
     "yauzl": "^3.3.1"
   },
