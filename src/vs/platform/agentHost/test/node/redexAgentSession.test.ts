@@ -27,11 +27,11 @@ import { IDiffComputeService } from '../../common/diffComputeService.js';
 import { ISessionDataService } from '../../common/sessionDataService.js';
 import { ActionType, type ChatDeltaAction, type ChatErrorAction, type ChatInputRequestedAction, type ChatResponsePartAction, type ChatToolCallCompleteAction, type ChatToolCallReadyAction, type ChatToolCallStartAction, type ChatTurnCompleteAction } from '../../common/state/sessionActions.js';
 import { MessageAttachmentKind, MessageKind, ResponsePartKind, ChatInputAnswerState, ChatInputAnswerValueKind, ChatInputQuestionKind, ChatInputResponseKind, ToolCallContributorKind, ToolCallStatus, ToolResultContentType, buildDefaultChatUri, type ToolDefinition, type ToolResultContent, type ToolResultFileEditContent, type UsageInfoMeta } from '../../common/state/sessionState.js';
-import { CopilotAgentSession } from '../../node/redex/copilotAgentSession.js';
+import { redexAgentSession } from '../../node/redex/redexAgentSession.js';
 import { ActiveClientToolSet } from '../../node/activeClientState.js';
-import { type CopilotSessionLaunchPlan, type IActiveClientSnapshot, type ICopilotSessionLauncher, type ICopilotSessionRuntime } from '../../node/redex/copilotSessionLauncher.js';
-import { CopilotSessionWrapper } from '../../node/redex/copilotSessionWrapper.js';
-import { buildCopilotSystemNotification } from '../../node/redex/copilotSystemNotification.js';
+import { type redexSessionLaunchPlan, type IActiveClientSnapshot, type IredexSessionLauncher, type IredexSessionRuntime } from '../../node/redex/redexSessionLauncher.js';
+import { redexSessionWrapper } from '../../node/redex/redexSessionWrapper.js';
+import { buildredexSystemNotification } from '../../node/redex/redexSystemNotification.js';
 import { IAgentConfigurationService } from '../../node/agentConfigurationService.js';
 import { SessionConfigKey } from '../../common/sessionConfigKeys.js';
 import { AgentHostGlobalAutoApproveEnabledConfigKey } from '../../common/agentHostSchema.js';
@@ -46,7 +46,7 @@ import { IAgentServerToolHost } from '../../common/agentServerTools.js';
 /**
  * Minimal mock of the SDK's {@link CopilotSession}. Implements `on()` to
  * store typed handlers, and exposes `fire()` so tests can push events
- * through the real {@link CopilotSessionWrapper} event pipeline.
+ * through the real {@link redexSessionWrapper} event pipeline.
  */
 class MockCopilotSession {
 	readonly sessionId = 'test-session-1';
@@ -224,7 +224,7 @@ class RecordingTelemetryService implements ITelemetryService {
 /**
  * Invokes a client-SDK tool's handler with the minimal fields the SDK
  * contract requires, and narrows the `unknown` return type to
- * {@link ToolResultObject} — which is what {@link CopilotAgentSession}'s
+ * {@link ToolResultObject} — which is what {@link redexAgentSession}'s
  * handler implementation actually returns.
  */
 function invokeClientToolHandler(tool: Pick<Tool, 'name' | 'handler'>, toolCallId: string, args: Record<string, unknown> = {}): Promise<ToolResultObject> {
@@ -280,14 +280,14 @@ async function createAgentSession(disposables: DisposableStore, options?: {
 	rootValues?: Record<string, unknown>;
 	fileContents?: Record<string, string>;
 	fileReadErrors?: readonly string[];
-	/** Configure the mock session before {@link CopilotAgentSession.initializeSession} runs. */
+	/** Configure the mock session before {@link redexAgentSession.initializeSession} runs. */
 	configureMockSession?: (session: MockCopilotSession) => void;
 	/** Optional server-tool host wired into the session. */
 	serverToolHost?: IAgentServerToolHost;
 	/** Platform used to compute the SDK sandbox policy. Defaults to `'linux'` so sandbox tests are deterministic. */
 	platform?: NodeJS.Platform;
 }): Promise<{
-	session: CopilotAgentSession;
+	session: redexAgentSession;
 	runtime: ICopilotSessionRuntime;
 	mockSession: MockCopilotSession;
 	signals: AgentSignal[];
@@ -345,7 +345,7 @@ async function createAgentSession(disposables: DisposableStore, options?: {
 			if (options?.captureRuntime) {
 				options.captureRuntime.current = runtime;
 			}
-			return new CopilotSessionWrapper(mockSession as unknown as CopilotSession);
+			return new redexSessionWrapper(mockSession as unknown as CopilotSession);
 		}
 	};
 
@@ -394,7 +394,7 @@ async function createAgentSession(disposables: DisposableStore, options?: {
 	const instantiationService = disposables.add(new InstantiationService(services));
 
 	const session = disposables.add(instantiationService.createInstance(
-		CopilotAgentSession,
+		redexAgentSession,
 		{
 			sessionUri,
 			chatChannelUri: URI.parse(buildDefaultChatUri(sessionUri)),
@@ -420,17 +420,17 @@ async function createAgentSession(disposables: DisposableStore, options?: {
 
 // ---- Tests ------------------------------------------------------------------
 
-suite('CopilotAgentSession', () => {
+suite('redexAgentSession', () => {
 
 	const disposables = new DisposableStore();
 
 	teardown(() => disposables.clear());
 	ensureNoDisposablesAreLeakedInTestSuite();
 
-	suite('CopilotSessionWrapper', () => {
+	suite('redexSessionWrapper', () => {
 		test('fires unhandled events when no wrapped listener is registered', () => {
 			const mockSession = new MockCopilotSession();
-			const wrapper = disposables.add(new CopilotSessionWrapper(mockSession as unknown as CopilotSession));
+			const wrapper = disposables.add(new redexSessionWrapper(mockSession as unknown as CopilotSession));
 			const events: string[] = [];
 			disposables.add(wrapper.onUnhandledEvent(e => events.push(e.type)));
 
@@ -441,7 +441,7 @@ suite('CopilotAgentSession', () => {
 
 		test('tracks wrapped listener registrations dynamically', () => {
 			const mockSession = new MockCopilotSession();
-			const wrapper = disposables.add(new CopilotSessionWrapper(mockSession as unknown as CopilotSession));
+			const wrapper = disposables.add(new redexSessionWrapper(mockSession as unknown as CopilotSession));
 			const events: string[] = [];
 			disposables.add(wrapper.onUnhandledEvent(e => events.push(e.type)));
 			const handledListener = wrapper.onSessionCompactionStart(() => { });
@@ -1931,7 +1931,7 @@ suite('CopilotAgentSession', () => {
 				type: 'system.notification' as const,
 			};
 
-			assert.deepStrictEqual(buildCopilotSystemNotification({
+			assert.deepStrictEqual(buildredexSystemNotification({
 				...base,
 				data: {
 					content: '<system_notification>\nShell done\n</system_notification>',
@@ -1942,7 +1942,7 @@ suite('CopilotAgentSession', () => {
 				messageText: '`sleep 6` completed',
 			});
 
-			assert.deepStrictEqual(buildCopilotSystemNotification({
+			assert.deepStrictEqual(buildredexSystemNotification({
 				...base,
 				data: {
 					content: 'Detached done',
@@ -1953,7 +1953,7 @@ suite('CopilotAgentSession', () => {
 				messageText: 'Shell `detached-a` completed',
 			});
 
-			assert.deepStrictEqual(buildCopilotSystemNotification({
+			assert.deepStrictEqual(buildredexSystemNotification({
 				...base,
 				data: {
 					content: 'Agent done',
@@ -1964,7 +1964,7 @@ suite('CopilotAgentSession', () => {
 				messageText: 'Background agent completed',
 			});
 
-			assert.strictEqual(buildCopilotSystemNotification({
+			assert.strictEqual(buildredexSystemNotification({
 				...base,
 				data: {
 					content: 'Agent idle',

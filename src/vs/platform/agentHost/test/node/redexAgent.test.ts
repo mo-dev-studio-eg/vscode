@@ -42,12 +42,12 @@ import { IAgentHostGitService } from '../../common/agentHostGitService.js';
 import { IAgentHostTerminalManager } from '../../node/agentHostTerminalManager.js';
 import { IAgentHostOTelService } from '../../common/otel/agentHostOTelService.js';
 import { AgentHostCompletions, IAgentHostCompletions } from '../../node/agentHostCompletions.js';
-import { COPILOT_AGENT_HOST_SYSTEM_MESSAGE, CopilotAgent, getCopilotWorktreeName, getCopilotWorktreesRoot, migrateEnablementKeys, rebaseUnder } from '../../node/redex/copilotAgent.js';
+import { COPILOT_AGENT_HOST_SYSTEM_MESSAGE, redexAgent, getredexWorktreeName, getredexWorktreesRoot, migrateEnablementKeys, rebaseUnder } from '../../node/redex/redexAgent.js';
 import { NULL_CHECKPOINT_SERVICE } from '../../common/agentHostCheckpointService.js';
-import { CopilotAgentSession } from '../../node/redex/copilotAgentSession.js';
-import { CopilotBranchNameGenerator, ICopilotBranchNameGenerator, getCopilotBranchNameHintFromMessage, normalizeCopilotBranchName } from '../../node/redex/copilotBranchNameGenerator.js';
-import type { CopilotSessionLaunchPlan, IActiveClientSnapshot } from '../../node/redex/copilotSessionLauncher.js';
-import { ShellManager } from '../../node/redex/copilotShellTools.js';
+import { redexAgentSession } from '../../node/redex/redexAgentSession.js';
+import { redexBranchNameGenerator, IredexBranchNameGenerator, getCopilotBranchNameHintFromMessage, normalizeCopilotBranchName } from '../../node/redex/redexBranchNameGenerator.js';
+import type { CopilotSessionLaunchPlan, IActiveClientSnapshot } from '../../node/redex/redexSessionLauncher.js';
+import { ShellManager } from '../../node/redex/redexShellTools.js';
 import { SessionDatabase } from '../../node/sessionDatabase.js';
 import { createNullSessionDataService } from '../common/sessionTestHelpers.js';
 import { ActiveClientToolSet } from '../../node/activeClientState.js';
@@ -337,7 +337,7 @@ class MockAgentHostOTelService implements IAgentHostOTelService {
 	}
 }
 
-class ResumePathCopilotAgent extends CopilotAgent {
+class ResumePathredexAgent extends redexAgent {
 	constructor(
 		private readonly _copilotClient: ITestCopilotClient,
 		@ILogService logService: ILogService,
@@ -345,7 +345,7 @@ class ResumePathCopilotAgent extends CopilotAgent {
 		@ISessionDataService sessionDataService: ISessionDataService,
 		@IAgentHostGitService gitService: IAgentHostGitService,
 		@IAgentConfigurationService configurationService: IAgentConfigurationService,
-		@ICopilotBranchNameGenerator branchNameGenerator: ICopilotBranchNameGenerator,
+		@IredexBranchNameGenerator branchNameGenerator: IredexBranchNameGenerator,
 		@IAgentHostCompletions completions: IAgentHostCompletions,
 	) {
 		super(logService, instantiationService, sessionDataService, gitService, configurationService, new MockAgentHostOTelService(), branchNameGenerator, completions, NULL_CHECKPOINT_SERVICE);
@@ -357,7 +357,7 @@ class ResumePathCopilotAgent extends CopilotAgent {
 	}
 }
 
-class TestableCopilotAgent extends CopilotAgent {
+class TestableredexAgent extends redexAgent {
 	private readonly _fakeSessions = new Map<string, IFakeAgentSession>();
 	readonly resumeCalls: string[] = [];
 
@@ -372,7 +372,7 @@ class TestableCopilotAgent extends CopilotAgent {
 		@ISessionDataService sessionDataService: ISessionDataService,
 		@IAgentHostGitService gitService: IAgentHostGitService,
 		@IAgentConfigurationService configurationService: IAgentConfigurationService,
-		@ICopilotBranchNameGenerator branchNameGenerator: ICopilotBranchNameGenerator,
+		@IredexBranchNameGenerator branchNameGenerator: IredexBranchNameGenerator,
 		@IAgentHostCompletions completions: IAgentHostCompletions,
 	) {
 		super(logService, instantiationService, sessionDataService, gitService, configurationService, new MockAgentHostOTelService(), branchNameGenerator, completions, NULL_CHECKPOINT_SERVICE);
@@ -387,7 +387,7 @@ class TestableCopilotAgent extends CopilotAgent {
 		this._fakeSessions.set(sessionId, fake);
 	}
 
-	protected override async _resumeSession(sessionId: string): Promise<CopilotAgentSession> {
+	protected override async _resumeSession(sessionId: string): Promise<redexAgentSession> {
 		this.resumeCalls.push(sessionId);
 		const fake = this._fakeSessions.get(sessionId);
 		if (!fake) {
@@ -416,16 +416,16 @@ class TestableCopilotAgent extends CopilotAgent {
 					},
 				});
 			},
-		} as unknown as CopilotAgentSession;
+		} as unknown as redexAgentSession;
 		return stub;
 	}
 
-	resolveWorktreeForTest(config: Parameters<CopilotAgent['createSession']>[0], sessionId: string, prompt?: string): Promise<URI | undefined> {
+	resolveWorktreeForTest(config: Parameters<redexAgent['createSession']>[0], sessionId: string, prompt?: string): Promise<URI | undefined> {
 		return this._resolveSessionWorkingDirectory(config, sessionId, prompt);
 	}
 }
 
-function createTestAgentContext(disposables: Pick<DisposableStore, 'add'>, options?: { sessionDataService?: ISessionDataService; copilotClient?: ITestCopilotClient; useRealResumePath?: boolean; gitService?: TestAgentHostGitService; environmentServiceRegistration?: 'native' | 'none'; pluginManager?: IAgentPluginManager; fileService?: FileService; copilotApiService?: ICopilotApiService }): { agent: CopilotAgent; instantiationService: IInstantiationService; configurationService: IAgentConfigurationService; fileService: FileService } {
+function createTestAgentContext(disposables: Pick<DisposableStore, 'add'>, options?: { sessionDataService?: ISessionDataService; copilotClient?: ITestCopilotClient; useRealResumePath?: boolean; gitService?: TestAgentHostGitService; environmentServiceRegistration?: 'native' | 'none'; pluginManager?: IAgentPluginManager; fileService?: FileService; copilotApiService?: ICopilotApiService }): { agent: redexAgent; instantiationService: IInstantiationService; configurationService: IAgentConfigurationService; fileService: FileService } {
 	const services = new ServiceCollection();
 	const logService = new NullLogService();
 	const fileService = options?.fileService ?? disposables.add(new FileService(logService));
@@ -447,7 +447,7 @@ function createTestAgentContext(disposables: Pick<DisposableStore, 'add'>, optio
 	services.set(IAgentHostCompletions, disposables.add(new AgentHostCompletions(logService)));
 	const copilotApiService = options?.copilotApiService ?? new TestCopilotApiService();
 	services.set(ICopilotApiService, copilotApiService);
-	services.set(ICopilotBranchNameGenerator, new CopilotBranchNameGenerator(copilotApiService, logService));
+	services.set(IredexBranchNameGenerator, new redexBranchNameGenerator(copilotApiService, logService));
 	services.set(ITelemetryService, NullTelemetryService);
 	if (options?.environmentServiceRegistration !== 'none') {
 		const environmentService = {
@@ -459,18 +459,18 @@ function createTestAgentContext(disposables: Pick<DisposableStore, 'add'>, optio
 	const instantiationService: IInstantiationService = disposables.add(new InstantiationService(services));
 	services.set(IInstantiationService, instantiationService);
 	const agent = options?.copilotClient
-		? instantiationService.createInstance(options.useRealResumePath ? ResumePathCopilotAgent : TestableCopilotAgent, options.copilotClient)
-		: instantiationService.createInstance(CopilotAgent);
+		? instantiationService.createInstance(options.useRealResumePath ? ResumePathredexAgent : TestableredexAgent, options.copilotClient)
+		: instantiationService.createInstance(redexAgent);
 	return { agent, instantiationService, configurationService: configService, fileService };
 }
 
-function createTestAgent(disposables: Pick<DisposableStore, 'add'>, options?: { sessionDataService?: ISessionDataService; copilotClient?: ITestCopilotClient; useRealResumePath?: boolean; gitService?: TestAgentHostGitService; environmentServiceRegistration?: 'native' | 'none'; pluginManager?: IAgentPluginManager; copilotApiService?: ICopilotApiService }): CopilotAgent {
+function createTestAgent(disposables: Pick<DisposableStore, 'add'>, options?: { sessionDataService?: ISessionDataService; copilotClient?: ITestCopilotClient; useRealResumePath?: boolean; gitService?: TestAgentHostGitService; environmentServiceRegistration?: 'native' | 'none'; pluginManager?: IAgentPluginManager; copilotApiService?: ICopilotApiService }): redexAgent {
 	return createTestAgentContext(disposables, options).agent;
 }
 
 type CopilotCreateSessionOptions = Parameters<CopilotClient['createSession']>[0];
 
-function createAgentSessionThroughAgent(agent: CopilotAgent, instantiationService: IInstantiationService): { readonly session: CopilotAgentSession; readonly createOptions: () => CopilotCreateSessionOptions | undefined } {
+function createAgentSessionThroughAgent(agent: redexAgent, instantiationService: IInstantiationService): { readonly session: redexAgentSession; readonly createOptions: () => CopilotCreateSessionOptions | undefined } {
 	const sessionUri = AgentSession.uri('copilotcli', 'test-session-1');
 	const shellManager = instantiationService.createInstance(ShellManager, sessionUri, undefined);
 	let createOptions: CopilotCreateSessionOptions | undefined;
@@ -493,7 +493,7 @@ function createAgentSessionThroughAgent(agent: CopilotAgent, instantiationServic
 		model: undefined,
 	};
 	const session = (agent as unknown as {
-		_createAgentSession: (launchPlan: CopilotSessionLaunchPlan, customizationDirectory: URI | undefined) => CopilotAgentSession;
+		_createAgentSession: (launchPlan: CopilotSessionLaunchPlan, customizationDirectory: URI | undefined) => redexAgentSession;
 	})._createAgentSession(launchPlan, undefined);
 	return { session, createOptions: () => createOptions };
 }
@@ -519,16 +519,16 @@ function sdkSession(sessionId: string, cwd?: string): Awaited<ReturnType<ITestCo
 	};
 }
 
-async function disposeAgent(agent: CopilotAgent): Promise<void> {
+async function disposeAgent(agent: redexAgent): Promise<void> {
 	await agent.shutdown();
 	agent.dispose();
-	// CopilotAgent.dispose calls super.dispose() from a promise continuation so
+	// redexAgent.dispose calls super.dispose() from a promise continuation so
 	// async shutdown can stop SDK sessions before child disposables are released.
 	// Let that continuation run before the disposable leak tracker checks.
 	await Promise.resolve();
 }
 
-suite('CopilotAgent', () => {
+suite('redexAgent', () => {
 	const disposables = ensureNoDisposablesAreLeakedInTestSuite();
 
 	test('advertises Copilot as its display name', async () => {
@@ -546,7 +546,7 @@ suite('CopilotAgent', () => {
 
 	test('uses the Copilot CLI sibling worktrees root convention', () => {
 		assert.strictEqual(
-			getCopilotWorktreesRoot(URI.file('/Users/me/src/vscode')).fsPath,
+			getredexWorktreesRoot(URI.file('/Users/me/src/vscode')).fsPath,
 			URI.file('/Users/me/src/vscode.worktrees').fsPath,
 		);
 	});
@@ -554,7 +554,7 @@ suite('CopilotAgent', () => {
 	test('uses generated Agents-window Copilot CLI branch names', async () => {
 		const copilotApiService = new TestCopilotApiService();
 		copilotApiService.response = 'add-agent-host-config';
-		const generator = new CopilotBranchNameGenerator(copilotApiService, new NullLogService());
+		const generator = new redexBranchNameGenerator(copilotApiService, new NullLogService());
 
 		assert.deepStrictEqual({
 			generated: await generator.generateBranchName({ sessionId: '12345678-aaaa-bbbb-cccc-123456789abc', message: 'Add agent host config', githubToken: 'token' }),
@@ -572,7 +572,7 @@ suite('CopilotAgent', () => {
 	test('appends a short session-id suffix when the branch name already exists', async () => {
 		const copilotApiService = new TestCopilotApiService();
 		copilotApiService.response = 'add-agent-host-config';
-		const generator = new CopilotBranchNameGenerator(copilotApiService, new NullLogService());
+		const generator = new redexBranchNameGenerator(copilotApiService, new NullLogService());
 
 		assert.deepStrictEqual({
 			unique: await generator.generateBranchName({ sessionId: '12345678-aaaa-bbbb-cccc-123456789abc', message: 'Add agent host config', githubToken: 'token', branchExists: async () => false }),
@@ -584,13 +584,13 @@ suite('CopilotAgent', () => {
 	});
 
 	test('uses Git extension branch-derived worktree folder names', () => {
-		assert.strictEqual(getCopilotWorktreeName('agents/add-agent-host-config-12345678'), 'add-agent-host-config-12345678');
+		assert.strictEqual(getredexWorktreeName('agents/add-agent-host-config-12345678'), 'add-agent-host-config-12345678');
 	});
 
 	test('keeps generated branch names short', async () => {
 		const copilotApiService = new TestCopilotApiService();
 		copilotApiService.response = 'a'.repeat(100);
-		const generator = new CopilotBranchNameGenerator(copilotApiService, new NullLogService());
+		const generator = new redexBranchNameGenerator(copilotApiService, new NullLogService());
 
 		assert.strictEqual(
 			(await generator.generateBranchName({ sessionId: '12345678-aaaa-bbbb-cccc-123456789abc', message: 'Add agent host config', githubToken: 'token' })).length,
@@ -635,7 +635,7 @@ suite('CopilotAgent', () => {
 	test('falls back to first-message slug when generated branch name cannot be used', async () => {
 		const copilotApiService = new TestCopilotApiService();
 		copilotApiService.response = '!!! ??? ...';
-		const generator = new CopilotBranchNameGenerator(copilotApiService, new NullLogService());
+		const generator = new redexBranchNameGenerator(copilotApiService, new NullLogService());
 
 		assert.strictEqual(
 			await generator.generateBranchName({ sessionId: '12345678-aaaa-bbbb-cccc-123456789abc', message: 'Add agent host config', githubToken: 'token' }),
@@ -646,7 +646,7 @@ suite('CopilotAgent', () => {
 	test('falls back to first-message slug when branch name generation fails', async () => {
 		const copilotApiService = new TestCopilotApiService();
 		copilotApiService.error = new Error('failed');
-		const generator = new CopilotBranchNameGenerator(copilotApiService, new NullLogService());
+		const generator = new redexBranchNameGenerator(copilotApiService, new NullLogService());
 
 		assert.strictEqual(
 			await generator.generateBranchName({ sessionId: '12345678-aaaa-bbbb-cccc-123456789abc', message: 'Add agent host config', githubToken: 'token' }),
@@ -657,7 +657,7 @@ suite('CopilotAgent', () => {
 	test('falls back to session id when no branch name can be derived', async () => {
 		const copilotApiService = new TestCopilotApiService();
 		copilotApiService.response = '!!! ??? ...';
-		const generator = new CopilotBranchNameGenerator(copilotApiService, new NullLogService());
+		const generator = new redexBranchNameGenerator(copilotApiService, new NullLogService());
 
 		assert.strictEqual(
 			await generator.generateBranchName({ sessionId: '12345678-aaaa-bbbb-cccc-123456789abc', message: '!!! ??? ...', githubToken: 'token' }),
@@ -2055,7 +2055,7 @@ suite('CopilotAgent', () => {
 		 * observe how `onClientToolCallComplete` resolves URIs to session
 		 * entries without standing up a full Copilot SDK session.
 		 */
-		function installStubSession(agent: CopilotAgent, sessionId: string): { calls: { toolCallId: string; result: ToolCallResult }[] } {
+		function installStubSession(agent: redexAgent, sessionId: string): { calls: { toolCallId: string; result: ToolCallResult }[] } {
 			const calls: { toolCallId: string; result: ToolCallResult }[] = [];
 			const stub = {
 				handleClientToolCallComplete(toolCallId: string, result: ToolCallResult) {
@@ -2165,7 +2165,7 @@ suite('CopilotAgent', () => {
 	suite('peer chat routing and lifecycle', () => {
 
 		/** Installs a stub peer chat into `_chatSessions` keyed by the chat URI. */
-		function installStubChat(agent: CopilotAgent, chatUri: URI, options?: { permissionOwner?: string; inputOwner?: string }) {
+		function installStubChat(agent: redexAgent, chatUri: URI, options?: { permissionOwner?: string; inputOwner?: string }) {
 			const events: string[] = [];
 			let disposed = false;
 			const stub = {
@@ -2335,7 +2335,7 @@ suite('CopilotAgent', () => {
 			requiresRestart(snap: IActiveClientSnapshot): Promise<boolean>;
 		};
 
-		function getActiveClient(agent: CopilotAgent, session: URI): TestActiveClient {
+		function getActiveClient(agent: redexAgent, session: URI): TestActiveClient {
 			const activeClients = (agent as unknown as { _activeClients: { get(s: URI): TestActiveClient | undefined } })._activeClients;
 			const activeClient = activeClients.get(session);
 			assert.ok(activeClient, 'expected an ActiveClient to exist after registering client tools');
@@ -2431,7 +2431,7 @@ suite('CopilotAgent', () => {
 	suite('_resumeSession dedup', () => {
 		// Regression: two concurrent paths (e.g. an outdated-config refresh in
 		// `sendMessage` and a `getSessionMessages` subscribe) each calling
-		// `_resumeSession(id)` used to construct two `CopilotAgentSession`
+		// `_resumeSession(id)` used to construct two `redexAgentSession`
 		// entries for the same id; the second `_sessions.set(id, …)` on the
 		// underlying `DisposableMap` disposed the first one mid
 		// `initializeSession()`, producing 'Trying to add a disposable to a
@@ -2439,15 +2439,15 @@ suite('CopilotAgent', () => {
 		// half-initialised session with no event subscriptions.
 
 		type AgentInternals = {
-			_resumeSession: (id: string) => Promise<CopilotAgentSession>;
-			_doResumeSession: (id: string) => Promise<CopilotAgentSession>;
+			_resumeSession: (id: string) => Promise<redexAgentSession>;
+			_doResumeSession: (id: string) => Promise<redexAgentSession>;
 		};
-		const makeFakeSession = () => ({ dispose: () => { } } as unknown as CopilotAgentSession);
+		const makeFakeSession = () => ({ dispose: () => { } } as unknown as redexAgentSession);
 
 		test('dedupes concurrent calls for the same sessionId', async () => {
 			const agent = createTestAgent(disposables);
 			const internals = agent as unknown as AgentInternals;
-			const deferred = new DeferredPromise<CopilotAgentSession>();
+			const deferred = new DeferredPromise<redexAgentSession>();
 			let doResumeCalls = 0;
 			internals._doResumeSession = () => {
 				doResumeCalls++;
@@ -2534,11 +2534,11 @@ suite('CopilotAgent', () => {
 			// already been disposed' warning this PR exists to eliminate.
 			const agent = createTestAgent(disposables);
 			const internals = agent as unknown as {
-				_registerInitializedSession: (id: string, s: CopilotAgentSession) => void;
+				_registerInitializedSession: (id: string, s: redexAgentSession) => void;
 				_shutdownPromise: Promise<void> | undefined;
 			};
 			let disposed = 0;
-			const fakeSession = { dispose: () => { disposed++; } } as unknown as CopilotAgentSession;
+			const fakeSession = { dispose: () => { disposed++; } } as unknown as redexAgentSession;
 			internals._shutdownPromise = Promise.resolve();
 			try {
 				assert.throws(
@@ -2557,7 +2557,7 @@ suite('CopilotAgent', () => {
 
 	suite('_resumeSession fallback', () => {
 		type AgentInternals = {
-			_resumeSession: (id: string) => Promise<CopilotAgentSession>;
+			_resumeSession: (id: string) => Promise<redexAgentSession>;
 		};
 
 		function createResumeFailingClient(message: string, code = -32603): { readonly client: TestCopilotClient; readonly getCreateSessionCalls: () => number } {
@@ -2626,7 +2626,7 @@ suite('CopilotAgent', () => {
 		// need a full Copilot SDK), then exercises both the live path
 		// (sendMessage emits a synthetic delta) and the restore path
 		// (getSessionMessages prepends to the first assistant message). A
-		// stubbed CopilotAgentSession is injected via overriding _resumeSession
+		// stubbed redexAgentSession is injected via overriding _resumeSession
 		// because the real one requires a full SDK CopilotSession with ~30
 		// event subscriptions.
 
@@ -2657,7 +2657,7 @@ suite('CopilotAgent', () => {
 				copilotClient: new TestCopilotClient([]),
 				gitService,
 				copilotApiService,
-			}) as TestableCopilotAgent;
+			}) as TestableredexAgent;
 
 			const fakeMessages: Turn[] = [
 				{
@@ -2770,7 +2770,7 @@ suite('CopilotAgent', () => {
 				sessionDataService,
 				copilotClient: new TestCopilotClient([]),
 				gitService,
-			}) as TestableCopilotAgent;
+			}) as TestableredexAgent;
 
 			const fakeMessages: Turn[] = [
 				{ id: 'u1', message: { text: 'hi', origin: { kind: MessageKind.User } }, responseParts: [{ kind: ResponsePartKind.Markdown, id: 'a1', content: 'untouched reply' }], usage: undefined, state: TurnState.Complete },
@@ -2821,7 +2821,7 @@ suite('CopilotAgent', () => {
 				sessionDataService: disposables.add(new TestSessionDataService()),
 				copilotClient: new TestCopilotClient([]),
 				gitService,
-			}) as TestableCopilotAgent;
+			}) as TestableredexAgent;
 
 			try {
 				await agent.authenticate('https://api.github.com', 'token');
@@ -2868,7 +2868,7 @@ suite('CopilotAgent', () => {
 				sessionDataService: disposables.add(new TestSessionDataService()),
 				copilotClient: new TestCopilotClient([]),
 				gitService,
-			}) as TestableCopilotAgent;
+			}) as TestableredexAgent;
 
 			try {
 				await agent.authenticate('https://api.github.com', 'token');
@@ -2899,7 +2899,7 @@ suite('CopilotAgent', () => {
 				sessionDataService: disposables.add(new TestSessionDataService()),
 				copilotClient: new TestCopilotClient([]),
 				gitService,
-			}) as TestableCopilotAgent;
+			}) as TestableredexAgent;
 
 			try {
 				await agent.authenticate('https://api.github.com', 'token');
@@ -2926,7 +2926,7 @@ suite('CopilotAgent', () => {
 				sessionDataService: disposables.add(new TestSessionDataService()),
 				copilotClient: new TestCopilotClient([]),
 				gitService,
-			}) as TestableCopilotAgent;
+			}) as TestableredexAgent;
 
 			try {
 				await agent.authenticate('https://api.github.com', 'token');
@@ -2954,7 +2954,7 @@ suite('CopilotAgent', () => {
 				sessionDataService: disposables.add(new TestSessionDataService()),
 				copilotClient: new TestCopilotClient([]),
 				gitService,
-			}) as TestableCopilotAgent;
+			}) as TestableredexAgent;
 
 			try {
 				await agent.authenticate('https://api.github.com', 'token');
@@ -3049,7 +3049,7 @@ suite('CopilotAgent', () => {
 			let anchor: URI | undefined;
 			const agentInternals = agent as unknown as {
 				_resolveSessionWorkingDirectory: (config: unknown, sessionId: string, prompt?: string) => Promise<URI | undefined>;
-				_createAgentSession: (launchPlan: CopilotSessionLaunchPlan, customizationDirectory: URI | undefined, activeClient: unknown, channelUri?: URI) => CopilotAgentSession;
+				_createAgentSession: (launchPlan: CopilotSessionLaunchPlan, customizationDirectory: URI | undefined, activeClient: unknown, channelUri?: URI) => redexAgentSession;
 			};
 			agentInternals._resolveSessionWorkingDirectory = async () => resolvedWorkingDirectory;
 			const originalCreateAgentSession = agentInternals._createAgentSession;

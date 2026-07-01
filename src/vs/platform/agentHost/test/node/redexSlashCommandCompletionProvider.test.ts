@@ -8,9 +8,9 @@ import { CancellationToken } from '../../../../base/common/cancellation.js';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
 import { CompletionItemKind } from '../../common/state/protocol/commands.js';
 import { MessageAttachmentKind } from '../../common/state/protocol/state.js';
-import { CopilotSlashCommandCompletionProvider, parseLeadingSlashCommand } from '../../node/redex/copilotSlashCommandCompletionProvider.js';
+import { redexSlashCommandCompletionProvider, parseLeadingSlashCommand } from '../../node/redex/redexSlashCommandCompletionProvider.js';
 
-suite('CopilotSlashCommandCompletionProvider', () => {
+suite('redexSlashCommandCompletionProvider', () => {
 
 	ensureNoDisposablesAreLeakedInTestSuite();
 
@@ -102,7 +102,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 			{ name: 'review', description: 'Runtime review', kind: 'builtin' as const, allowDuringAgentExecution: true, input: { hint: 'scope' } },
 			{ name: 'security-review', description: 'Runtime security review', kind: 'builtin' as const, allowDuringAgentExecution: true, input: { hint: 'scope' } },
 		];
-		const provider = new CopilotSlashCommandCompletionProvider('copilotcli', {
+		const provider = new redexSlashCommandCompletionProvider('copilotcli', {
 			isRubberDuckEnabled: () => true,
 			getRuntimeSlashCommands: async () => runtimeCommands,
 		});
@@ -274,7 +274,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 		});
 
 		test('omits /rubber-duck when not enabled', async () => {
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => false,
 				getRuntimeSlashCommands: async () => runtimeCommands,
 			});
@@ -296,7 +296,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 		});
 
 		test('returns no completion items when runtime command list is empty', async () => {
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => true,
 				getRuntimeSlashCommands: async () => [],
 			});
@@ -307,7 +307,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 		});
 
 		test('filters out runtime commands omitted from the catalog', async () => {
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => true,
 				getRuntimeSlashCommands: async () => runtimeCommands.filter(command => command.name !== 'env'),
 			});
@@ -330,7 +330,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 		});
 
 		test('includes runtime SDK commands in completion results', async () => {
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => true,
 				getRuntimeSlashCommands: async () => [{
 					name: 'focus',
@@ -347,7 +347,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 		});
 
 		test('keeps runtime commands that also have local send-time handling', async () => {
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => true,
 				getRuntimeSlashCommands: async () => [
 					{ name: 'plan', description: 'runtime plan', kind: 'builtin', allowDuringAgentExecution: true, input: { hint: 'task' } },
@@ -362,7 +362,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 		});
 
 		test('uses runtime input metadata to determine trailing space insertion', async () => {
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => true,
 				getRuntimeSlashCommands: async () => [
 					{ name: 'no-input', description: 'No input', kind: 'builtin', allowDuringAgentExecution: true },
@@ -376,7 +376,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 		});
 
 		test('expands an enumerated hint into one item per option (with brackets)', async () => {
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => true,
 				getRuntimeSlashCommands: async () => [
 					{ name: 'toggle', description: 'Toggle a feature on or off', kind: 'builtin', allowDuringAgentExecution: true, input: { hint: '[on|off]' } },
@@ -390,7 +390,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 		});
 
 		test('expands an enumerated hint into one item per option (without brackets)', async () => {
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => true,
 				getRuntimeSlashCommands: async () => [
 					{ name: 'toggle', description: 'Toggle a feature on or off', kind: 'builtin', allowDuringAgentExecution: true, input: { hint: 'on|off' } },
@@ -404,7 +404,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 		});
 
 		test('expands an enumerated hint into one item per option (requires input)', async () => {
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => true,
 				getRuntimeSlashCommands: async () => [
 					{ name: 'toggle', description: 'Toggle a feature on or off', kind: 'builtin', allowDuringAgentExecution: true, input: { required: true, hint: '[on|off]' } },
@@ -419,7 +419,7 @@ suite('CopilotSlashCommandCompletionProvider', () => {
 
 		test('passes raw session id to runtime command listing', async () => {
 			let seen: string | undefined;
-			const gated = new CopilotSlashCommandCompletionProvider('copilotcli', {
+			const gated = new redexSlashCommandCompletionProvider('copilotcli', {
 				isRubberDuckEnabled: () => true,
 				getRuntimeSlashCommands: async (id: string) => {
 					seen = id;

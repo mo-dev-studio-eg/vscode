@@ -6,9 +6,9 @@
 import assert from 'assert';
 import { URI } from '../../../../base/common/uri.js';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
-import { getEditFilePath, getEditFilePaths, getInvocationMessage, getPastTenseMessage, getPermissionDisplay, getShellLanguage, getToolDisplayName, getToolInputString, getToolKind, getToolMarkdownContent, isEditTool, isHiddenTool, isMarkdownRenderedTool, synthesizeSkillToolCall, type ITypedPermissionRequest } from '../../node/redex/copilotToolDisplay.js';
+import { getEditFilePath, getEditFilePaths, getInvocationMessage, getPastTenseMessage, getPermissionDisplay, getShellLanguage, getToolDisplayName, getToolInputString, getToolKind, getToolMarkdownContent, isEditTool, isHiddenTool, isMarkdownRenderedTool, synthesizeSkillToolCall, type ITypedPermissionRequest } from '../../node/redex/redexToolDisplay.js';
 
-suite('copilotToolDisplay — friendly tool names', () => {
+suite('redexToolDisplay — friendly tool names', () => {
 
 	ensureNoDisposablesAreLeakedInTestSuite();
 
@@ -78,7 +78,7 @@ suite('copilotToolDisplay — friendly tool names', () => {
 	});
 });
 
-suite('copilotToolDisplay — edit tool classification', () => {
+suite('redexToolDisplay — edit tool classification', () => {
 
 	ensureNoDisposablesAreLeakedInTestSuite();
 
@@ -98,7 +98,7 @@ suite('copilotToolDisplay — edit tool classification', () => {
 	});
 });
 
-suite('copilotToolDisplay — markdown-rendered tools', () => {
+suite('redexToolDisplay — markdown-rendered tools', () => {
 
 	ensureNoDisposablesAreLeakedInTestSuite();
 
@@ -301,7 +301,7 @@ suite('view tool — view_range display', () => {
 // registered with `skipPermission: true` — see copilotShellTools.ts), but they
 // still flow through the tool-execution display pipeline.
 
-suite('copilotToolDisplay — write_/read_ shell tools', () => {
+suite('redexToolDisplay — write_/read_ shell tools', () => {
 
 	ensureNoDisposablesAreLeakedInTestSuite();
 

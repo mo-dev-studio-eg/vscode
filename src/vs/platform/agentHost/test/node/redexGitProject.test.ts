@@ -7,7 +7,7 @@ import assert from 'assert';
 import { URI } from '../../../../base/common/uri.js';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
 import type { IAgentHostGitService } from '../../common/agentHostGitService.js';
-import { projectFromCopilotContext, projectFromRepository, resolveGitProject } from '../../node/redex/copilotGitProject.js';
+import { projectFromredexContext, projectFromRepository, resolveGitProject } from '../../node/redex/redexGitProject.js';
 
 class TestAgentHostGitService implements IAgentHostGitService {
 	declare readonly _serviceBrand: undefined;
@@ -84,7 +84,7 @@ suite('Copilot Git Project', () => {
 	});
 
 	test('falls back to repository context when no git project is available', async () => {
-		const project = await projectFromCopilotContext({ repository: 'microsoft/vscode' }, gitService);
+		const project = await projectFromredexContext({ repository: 'microsoft/vscode' }, gitService);
 
 		assert.deepStrictEqual({
 			uri: project?.uri.toString(),

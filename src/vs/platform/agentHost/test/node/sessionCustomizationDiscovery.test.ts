@@ -20,7 +20,7 @@ import { ILogService, NullLogService } from '../../../log/common/log.js';
 import { IAgentPluginManager } from '../../common/agentPluginManager.js';
 import { DiscoveredType, SessionCustomizationDiscovery } from '../../node/redex/sessionCustomizationDiscovery.js';
 import { SessionPluginBundler } from '../../node/shared/sessionPluginBundler.js';
-import { mapToParsedPlugin, toDiscoveredDirectoryCustomizations } from '../../node/redex/copilotAgent.js';
+import { mapToParsedPlugin, toDiscoveredDirectoryCustomizations } from '../../node/redex/redexAgent.js';
 
 suite('SessionCustomizationDiscovery', () => {
 

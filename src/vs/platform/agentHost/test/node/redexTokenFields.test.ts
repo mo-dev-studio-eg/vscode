@@ -5,36 +5,36 @@
 
 import assert from 'assert';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
-import { isRestrictedTelemetryEnabled, parseCopilotTokenFields } from '../../node/redex/copilotTokenFields.js';
+import { isRestrictedTelemetryEnabled, parseredexTokenFields } from '../../node/redex/redexTokenFields.js';
 
-suite('copilotTokenFields', () => {
+suite('redexTokenFields', () => {
 
 	ensureNoDisposablesAreLeakedInTestSuite();
 
-	suite('parseCopilotTokenFields', () => {
+	suite('parseredexTokenFields', () => {
 		test('returns empty map for undefined token', () => {
-			assert.strictEqual(parseCopilotTokenFields(undefined).size, 0);
+			assert.strictEqual(parseredexTokenFields(undefined).size, 0);
 		});
 
 		test('returns empty map for empty token', () => {
-			assert.strictEqual(parseCopilotTokenFields('').size, 0);
+			assert.strictEqual(parseredexTokenFields('').size, 0);
 		});
 
 		test('parses fields from the leading colon-delimited segment', () => {
-			const fields = parseCopilotTokenFields('tid=abc;exp=123;rt=1:HMACSIGNATURE');
+			const fields = parseredexTokenFields('tid=abc;exp=123;rt=1:HMACSIGNATURE');
 			assert.strictEqual(fields.get('tid'), 'abc');
 			assert.strictEqual(fields.get('exp'), '123');
 			assert.strictEqual(fields.get('rt'), '1');
 		});
 
 		test('parses fields when no colon separator is present', () => {
-			const fields = parseCopilotTokenFields('tid=abc;rt=1');
+			const fields = parseredexTokenFields('tid=abc;rt=1');
 			assert.strictEqual(fields.get('tid'), 'abc');
 			assert.strictEqual(fields.get('rt'), '1');
 		});
 
 		test('skips segments without a value separator', () => {
-			const fields = parseCopilotTokenFields('tid=abc;rt;exp=123:HMAC');
+			const fields = parseredexTokenFields('tid=abc;rt;exp=123:HMAC');
 			assert.strictEqual(fields.has('rt'), false);
 			assert.strictEqual(fields.get('tid'), 'abc');
 			assert.strictEqual(fields.get('exp'), '123');
