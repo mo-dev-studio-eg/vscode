@@ -12,7 +12,7 @@ import { FileEditKind, MessageKind, ResponsePartKind, ToolResultContentType } fr
 import { SessionDatabase } from '../../node/sessionDatabase.js';
 import { parseSessionDbUri } from '../../node/shared/fileEditTracker.js';
 import { mapSessionEventsToHistoryRecords } from './historyRecordFixtures.js';
-import { mapSessionEvents } from '../../node/copilot/mapSessionEvents.js';
+import { mapSessionEvents } from '../../node/redex/mapSessionEvents.js';
 import { toSessionEvents, type ISessionEvent } from './copilotTestEvents.js';
 
 suite('mapSessionEventsToHistoryRecords', () => {

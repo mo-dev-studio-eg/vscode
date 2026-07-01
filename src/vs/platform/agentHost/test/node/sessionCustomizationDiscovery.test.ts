@@ -18,9 +18,9 @@ import { InMemoryFileSystemProvider } from '../../../files/common/inMemoryFilesy
 import { TestInstantiationService } from '../../../instantiation/test/common/instantiationServiceMock.js';
 import { ILogService, NullLogService } from '../../../log/common/log.js';
 import { IAgentPluginManager } from '../../common/agentPluginManager.js';
-import { DiscoveredType, SessionCustomizationDiscovery } from '../../node/copilot/sessionCustomizationDiscovery.js';
+import { DiscoveredType, SessionCustomizationDiscovery } from '../../node/redex/sessionCustomizationDiscovery.js';
 import { SessionPluginBundler } from '../../node/shared/sessionPluginBundler.js';
-import { mapToParsedPlugin, toDiscoveredDirectoryCustomizations } from '../../node/copilot/copilotAgent.js';
+import { mapToParsedPlugin, toDiscoveredDirectoryCustomizations } from '../../node/redex/redexAgent.js';
 
 suite('SessionCustomizationDiscovery', () => {
 

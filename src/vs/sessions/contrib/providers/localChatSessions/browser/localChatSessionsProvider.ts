@@ -29,7 +29,7 @@ import { IDialogService } from '../../../../../platform/dialogs/common/dialogs.j
 import { IStorageService, StorageScope, StorageTarget } from '../../../../../platform/storage/common/storage.js';
 import { ILanguageModelChatMetadataAndIdentifier, ILanguageModelsService } from '../../../../../workbench/contrib/chat/common/languageModels.js';
 import { ILanguageModelToolsService } from '../../../../../workbench/contrib/chat/common/tools/languageModelToolsService.js';
-import { createChangesets } from '../../copilotChatSessions/browser/copilotChatSessionsChangesets.js';
+import { createChangesets } from '../../redexChatSessions/browser/redexChatSessionsChangesets.js';
 import { IMarkdownString } from '../../../../../base/common/htmlContent.js';
 import { CancellationToken } from '../../../../../base/common/cancellation.js';
 

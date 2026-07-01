@@ -41,8 +41,8 @@ import { IActiveSession } from '../../../../services/sessions/common/sessionsMan
 import { ISessionContext } from '../../../../services/sessions/browser/sessionContext.js';
 import type { ISessionsProvider } from '../../../../services/sessions/common/sessionsProvider.js';
 import { type IAgentHostSessionsProvider, isAgentHostProvider, LOCAL_AGENT_HOST_PROVIDER_ID, REMOTE_AGENT_HOST_PROVIDER_RE } from '../../../../common/agentHostSessionsProvider.js';
-import { PermissionPicker } from '../../copilotChatSessions/browser/permissionPicker.js';
-import { MobilePermissionPicker } from '../../copilotChatSessions/browser/mobilePermissionPicker.js';
+import { PermissionPicker } from '../../redexChatSessions/browser/permissionPicker.js';
+import { MobilePermissionPicker } from '../../redexChatSessions/browser/mobilePermissionPicker.js';
 import { isPhoneLayout } from '../../../../browser/parts/mobile/mobileLayout.js';
 import { showMobilePickerSheet, IMobilePickerSheetItem, IMobilePickerSheetSearchSource } from '../../../../browser/parts/mobile/mobilePickerSheet.js';
 import { AgentHostModePicker } from './agentHostModePicker.js';

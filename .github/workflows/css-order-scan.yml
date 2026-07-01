@@ -48,11 +48,15 @@ jobs:
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: build
+        env:
+          npm_config_ignore_scripts: true
 
       - name: Install rspack dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: build/rspack
+        env:
+          npm_config_ignore_scripts: true
 
       - name: Save node_modules cache
         if: steps.cache-node-modules.outputs.cache-hit != 'true'

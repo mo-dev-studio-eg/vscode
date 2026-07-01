@@ -5,7 +5,7 @@
 
 import assert from 'assert';
 import type { SectionOverride } from '@github/copilot-sdk';
-import { resolveToolInstructionsOverride, universalToolInstructions } from '../../node/copilot/prompts/toolInstructions.js';
+import { resolveToolInstructionsOverride, universalToolInstructions } from '../../node/redex/prompts/toolInstructions.js';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
 
 /** Builds a `hasTool` predicate backed by the given available tool names. */

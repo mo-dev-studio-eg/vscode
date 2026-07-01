@@ -92,6 +92,9 @@ export interface IProductConfiguration {
 	readonly nameShort: string;
 	readonly nameLong: string;
 
+	// Redex: Code-OSS version this build is based on
+	readonly codeOssVersion?: string;
+
 	readonly win32AppUserModelId?: string;
 	readonly win32MutexName?: string;
 	readonly win32SetupMutexName?: string;

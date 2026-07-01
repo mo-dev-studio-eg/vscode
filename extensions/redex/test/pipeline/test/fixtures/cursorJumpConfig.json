@@ -1,0 +1,8 @@
+{
+	"github.redex.chat.inlineEdits.xtabProvider.modelConfiguration": {
+		"modelName": "test-model",
+		"promptingStrategy": "xtabUnifiedModel",
+		"includeTagsInCurrentFile": true,
+		"lintOptions": null
+	}
+}

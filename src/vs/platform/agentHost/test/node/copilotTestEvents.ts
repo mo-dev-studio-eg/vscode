@@ -8,7 +8,7 @@ import type { Attachment, SessionEvent } from '@github/copilot-sdk';
 // =============================================================================
 // Minimal session-event shapes for tests
 // =============================================================================
-// Production (`node/copilot/mapSessionEvents.ts`) consumes the real SDK
+// Production (`node/redex/mapSessionEvents.ts`) consumes the real SDK
 // `SessionEvent` union. The SDK members require envelope fields the mapper
 // never reads (`parentId`, `timestamp`, `ephemeral`, …) plus stricter `data`
 // shapes, which makes hand-written event literals noisy. These ergonomic

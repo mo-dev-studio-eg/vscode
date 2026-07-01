@@ -1,13 +1,11 @@
-# Allowlist of pre-existing JavaScript files (.js, .cjs, .mjs).
+
 #
+# Allowlist of pre-existing JavaScript files (.js, .cjs, .mjs).
+# DO NOT ADD NEW ENTRIES. Write new files in TypeScript instead.
+# Lines starting with `#` are comments. Blank lines are ignored.
+# Modifications to this file require sign-off from the CODEOWNERS.
 # This file is consumed by eslint.config.js and gates the
 # `local/code-no-new-javascript-files` lint rule.
-#
-# DO NOT ADD NEW ENTRIES. Write new files in TypeScript instead.
-# Modifications to this file require sign-off from the CODEOWNERS.
-#
-# Lines starting with `#` are comments. Blank lines are ignored.
-
 .github/skills/heap-snapshot-analysis/helpers/streamSnapshot.mjs
 .vscode-test.js
 build/azure-pipelines/common/installPlaywright.js
@@ -71,6 +69,9 @@ extensions/objective-c/build/update-grammars.js
 extensions/php/build/update-grammar.mjs
 extensions/postinstall.mjs
 extensions/razor/build/update-grammar.mjs
+extensions/redex/.mocha-multi-reporters.js
+extensions/redex/.mocharc.js
+extensions/redex/.vscode-test.mjs
 extensions/rust/build/update-grammar.mjs
 extensions/search-result/syntaxes/generateTMLanguage.js
 extensions/sql/build/update-grammar.mjs
@@ -157,3 +158,30 @@ test/unit/electron/renderer.js
 test/unit/fullJsonStreamReporter.js
 test/unit/node/index.js
 test/unit/reporter.js
+extensions/redex/.vscode/extensions/visualization-runner/entry.js
+extensions/redex/script/electron/simulationWorkbenchMain.js
+extensions/redex/src/extension/completions-core/vscode-node/extension/test/run.js
+extensions/redex/src/extension/test/node/fixtures/gitdiff/generate-diffs.js
+extensions/redex/src/platform/parser/test/node/fixtures/test.js
+extensions/redex/test/scenarios/test-cli/wkspc1/sample.js
+extensions/redex/test/scenarios/test-cli/wkspc1/stringUtils.js
+extensions/redex/test/scenarios/test-cli/wkspc1/utils.js
+extensions/redex/test/scenarios/test-cli/wkspc2/foobar.js
+extensions/redex/test/scenarios/test-scenario-1/bar.js
+extensions/redex/test/scenarios/test-scenario-1/fib.js
+extensions/redex/test/scenarios/test-system/puppeteer.js
+extensions/redex/test/simulation/fixtures/edit/issue-6329/math.js
+extensions/redex/test/simulation/fixtures/edit/issue-7282/math.js
+extensions/redex/test/simulation/fixtures/editing/math.js
+extensions/redex/test/simulation/fixtures/gen-twice-issue-3597/new.js
+extensions/redex/test/simulation/fixtures/generate/issue-6956/.eslintrc.js
+extensions/redex/test/simulation/fixtures/multiFile/unicode-string-sequences/example.js
+extensions/redex/test/simulation/fixtures/multiFileEdit/two-edits/generate-command-ts.js
+extensions/redex/test/simulation/fixtures/review/binary-search-1.js
+extensions/redex/test/simulation/fixtures/review/binary-search-2.js
+extensions/redex/test/simulation/fixtures/tests/generate-jest/some/app.js
+extensions/redex/test/simulation/fixtures/tests/generate-jest/some/sum.js
+extensions/redex/test/simulation/fixtures/tests/generate-jest/some/sum.test.js
+extensions/redex/test/simulation/fixtures/tests/simple-js-proj copy/src/index.js
+extensions/redex/test/simulation/fixtures/tests/simple-js-proj/src/index.js
+extensions/redex/test/simulationExtension/extension.js

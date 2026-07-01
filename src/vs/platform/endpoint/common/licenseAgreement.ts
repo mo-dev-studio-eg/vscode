@@ -8,5 +8,10 @@
  *
  * WARNING: Do not move or rename this file.
  */
-export const COPILOT_LICENSE_AGREEMENT: string | undefined = undefined;
-export const COPILOT_INTEGRATION_ID: string = 'code-oss';
+
+// Redex exports
+export const redex_LICENSE_AGREEMENT: string | undefined = undefined;
+export const redex_INTEGRATION_ID: string = 'code-oss';
+
+// Copilot compatibility exports (for existing code/tests)
+export const COPILOT_LICENSE_AGREEMENT: string | undefined = redex_LICENSE_AGREEMENT;

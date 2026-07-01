@@ -114,10 +114,13 @@ jobs:
         run: npm ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm_config_ignore_scripts: true
 
       - name: Install build dependencies
         run: npm ci
         working-directory: build
+        env:
+          npm_config_ignore_scripts: true
 
       - name: Transpile source
         run: npm run transpile-client
@@ -213,6 +216,7 @@ jobs:
         run: npm ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm_config_ignore_scripts: true
 
       - name: Download build output
         uses: actions/download-artifact@v8

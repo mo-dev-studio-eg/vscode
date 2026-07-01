@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ICopilotTokenInfo, IDefaultAccount, IDefaultAccountAuthenticationProvider, IPolicyData } from '../../../base/common/defaultAccount.js';
+import { IredexTokenInfo, IDefaultAccount, IDefaultAccountAuthenticationProvider, IPolicyData } from '../../../base/common/defaultAccount.js';
 import { Event } from '../../../base/common/event.js';
 import { createDecorator } from '../../instantiation/common/instantiation.js';
 
@@ -11,13 +11,13 @@ import { createDecorator } from '../../instantiation/common/instantiation.js';
  * Well-known GitHub URL paths used with {@link IDefaultAccountService.resolveGitHubUrl}.
  */
 export const GitHubPaths = {
-	copilotSettings: 'settings/copilot/features',
-	billingBudgets: 'settings/copilot/features?utm_source=vscode',
-	copilotUpgrade: 'github-copilot/upgrade?utm_source=vscode',
+	redexSettings: 'settings/redex/features',
+	billingBudgets: 'settings/redex/features?utm_source=vscode',
+	redexUpgrade: 'github-redex/upgrade?utm_source=vscode',
 } as const;
 
 /**
- * Outcome of the last `/copilot_internal/managed_settings` fetch.
+ * Outcome of the last `/redex_internal/managed_settings` fetch.
  * - A numeric HTTP status code indicates the server responded with that code.
  * - `'ok'`: response parsed and adapted successfully (including an empty `{}` body).
  * - `'no-url'`: no `managedSettingsUrl` configured in product.json.
@@ -32,8 +32,8 @@ export interface IDefaultAccountProvider {
 	readonly onDidChangeDefaultAccount: Event<IDefaultAccount | null>;
 	readonly policyData: IPolicyData | null;
 	readonly onDidChangePolicyData: Event<IPolicyData | null>;
-	readonly copilotTokenInfo: ICopilotTokenInfo | null;
-	readonly onDidChangeCopilotTokenInfo: Event<ICopilotTokenInfo | null>;
+	readonly redexTokenInfo: IredexTokenInfo | null;
+	readonly onDidChangeredexTokenInfo: Event<IredexTokenInfo | null>;
 	readonly managedSettingsFetchStatus: ManagedSettingsFetchStatus;
 	/** Timestamp (ms) of the last managed-settings fetch, or `null` if never fetched. */
 	readonly managedSettingsFetchedAt: number | null;
@@ -46,7 +46,7 @@ export interface IDefaultAccountProvider {
 	 * base URL when the user is authenticated via a GHE provider, or
 	 * `https://github.com` otherwise.
 	 *
-	 * @param path The path portion of the URL (e.g. `settings/copilot/features`).
+	 * @param path The path portion of the URL (e.g. `settings/redex/features`).
 	 */
 	resolveGitHubUrl(path: string): string;
 
@@ -63,8 +63,8 @@ export interface IDefaultAccountService {
 	readonly onDidChangePolicyData: Event<IPolicyData | null>;
 	readonly policyData: IPolicyData | null;
 	readonly currentDefaultAccount: IDefaultAccount | null;
-	readonly copilotTokenInfo: ICopilotTokenInfo | null;
-	readonly onDidChangeCopilotTokenInfo: Event<ICopilotTokenInfo | null>;
+	readonly redexTokenInfo: IredexTokenInfo | null;
+	readonly onDidChangeredexTokenInfo: Event<IredexTokenInfo | null>;
 	readonly managedSettingsFetchStatus: ManagedSettingsFetchStatus;
 	/** Timestamp (ms) of the last managed-settings fetch, or `null` if never fetched. */
 	readonly managedSettingsFetchedAt: number | null;
@@ -82,7 +82,7 @@ export interface IDefaultAccountService {
 	 * base URL when the user is authenticated via a GHE provider, or
 	 * `https://github.com` otherwise.
 	 *
-	 * @param path The path portion of the URL (e.g. `settings/copilot/features`).
+	 * @param path The path portion of the URL (e.g. `settings/redex/features`).
 	 */
 	resolveGitHubUrl(path: string): string;
 }
